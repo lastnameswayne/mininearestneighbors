@@ -31,8 +31,6 @@ func main() {
 	fmt.Println("hello world")
 
 	// Graph construction is first step
-
-	//
 }
 
 func insertVector(graph Graph, vector Vector, efSize int) Graph {
