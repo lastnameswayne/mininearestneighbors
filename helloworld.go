@@ -5,6 +5,7 @@ import (
 	"math"
 	"math/rand"
 	"rand"
+	"sort"
 )
 
 type Vector struct {
@@ -50,7 +51,7 @@ func insertVector(graph Graph, vector Vector, efSize int) Graph {
 
 	enterPoint := enterPointHNSW
 
-	levelMultiplier := float64(1 / M) // m_L = rule of thumb is mL = 1/ln(M) where M is the number neighbors we add to each vertex on insertion
+	levelMultiplier := 1 / math.Log(float64(M)) // m_L = rule of thumb is mL = 1/ln(M) where M is the number neighbors we add to each vertex on insertion
 
 	// A vector is added to insertion layer and every layer below it
 	nearestElements := []Vector{}
@@ -141,8 +142,11 @@ func searchLevel(vertex Vertex, enterPoints []Vertex, efSize int, level int) []V
 
 }
 
-func selectNeighbors(vertex Vertex, W []Vertex, M int, level int) []Vertex {
-
+func selectNeighbors(vertex Vertex, W []Vertex, M int, level int) []Vertex { //simple
+	sort.Slice(W, func(i, j int) bool {
+		return distance(vertex, W[i]) > distance(vertex, W[j])
+	})
+	return W[:M]
 }
 
 func calculateLevel(levelMultiplier float64) int {
