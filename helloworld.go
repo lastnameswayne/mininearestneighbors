@@ -18,6 +18,7 @@ type ID int
 type Vertex struct {
 	id        ID
 	neighbors []Vertex
+	level     int
 }
 
 type Graph struct {
@@ -38,16 +39,35 @@ func insertVector(vector Vector, efConstruction int) {
 	M_max := 4
 	efConstruction := 100 // size of the dynamic list for the nearest neighbors
 
-	levelMultiplier := 0 // m_L = rule of thumb is mL = 1/ln(M) where M is the number neighbors we add to each vertex on insertion
+	entryPoint := getEntryPoint() //get enter point for hnsw
+
+	levelMultiplier := 0.0 // m_L = rule of thumb is mL = 1/ln(M) where M is the number neighbors we add to each vertex on insertion
 
 	// A vector is added to insertion layer and every layer below it
 	nearestElements := []Vector{}
 
 	level := calculateLevel(vector, levelMultiplier)
 
+	for i := 0; i < level; i++ {
+		W := searchLayer(vector, entryPoint, 1, level)
+		entryPoint := W[0]
+	}
+	for i := min(level, entryPoint.level); i > 0; i-- {
+		W = searchLayer(vector, entryPoint, efConstruction, i)
+		neighbors := selectNeighbors()
+	}
+}
+
+func getEntryPoint(vertex Vertex) Vertex {
+	return vertex
+}
+
+func searchLayer(vertex Vertex, entryPoint Vertex, ef int, level int) Vertex {
+
 }
 
 func calculateLevel(vector Vector, levelMultiplier float64) int {
+	//floor of -ln(unif(0,1)*mL)
 	uniform := rand.Float64()
 	prob := math.Log(-uniform * levelMultiplier)
 	level := math.Floor(prob)
