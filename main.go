@@ -26,6 +26,27 @@ type Graph struct {
 	vertices []Vertex
 }
 
+func (g Graph) PrintLayers() {
+	l0 := []Vertex{}
+	l1 := []Vertex{}
+	l2 := []Vertex{}
+
+	for _, e := range g.vertices {
+		if e.level == 0 {
+			l0 = append(l0, e)
+		}
+		if e.level == 1 {
+			l1 = append(l1, e)
+		}
+		if e.level == 2 {
+			l2 = append(l2, e)
+		}
+	}
+	fmt.Println("level 0", l0)
+	fmt.Println("level 1", l1)
+	fmt.Println("level 2", l2)
+}
+
 func main() {
 
 	fmt.Println("hello world")
@@ -81,18 +102,18 @@ func main() {
 	Graph = insertVector(Graph, v7, 5)
 	Graph = insertVector(Graph, v8, 5)
 
-	fmt.Println(Graph)
+	Graph.PrintLayers()
 	fmt.Println("searching")
-	fmt.Println(Search(q, Graph, 5))
+	fmt.Println(Search(q, Graph, 5, 3))
+
+}
+
+func (v Vertex) String() string {
+	return fmt.Sprintf("id %d \n level %d \n neighbors %v \n", int(v.id), v.level, v.neighbors)
 }
 
 func Search(q Vector, graph Graph, efSize int, k int) []Vertex {
-	//searches for q in graph
-	//returns the closest vector to q
-	//returns the vector and its distance to q
-	//search starts at the top layer and traverses greedily to find the efSize closest neighbors to q
-	//these are used as enterPoints in the next step
-	//s
+
 	W := []Vertex{}
 	queryElement := Vertex{
 		vector:    q.vector,
@@ -137,9 +158,11 @@ func insertVector(graph Graph, vector Vector, efSize int) Graph {
 		nearestElements = searchLevel(vertex, enterPoint, 1, level)
 		enterPoint = getClosestArr(vertex, nearestElements)
 	}
+	fmt.Println("starting here", enterPoint[0].id)
 
 	//searches again from the next layer
 	for i := min(level, enterPoint[0].level); i > 0; i-- {
+		fmt.Println("here", level, enterPoint[0].level)
 		nearestElements = searchLevel(vertex, enterPoint, efSize, i)
 		neighbors := selectNeighbors(vertex, nearestElements, M, level)
 
@@ -149,7 +172,7 @@ func insertVector(graph Graph, vector Vector, efSize int) Graph {
 			if len(neighbors) > M_max {
 				newNeighbors := selectNeighbors(n, neighbors, M_max, level)
 				n.neighbors = newNeighbors
-				vertex.neighbors = newNeighbors
+				// vertex.neighbors = newNeighbors
 			}
 		}
 		enterPoint = nearestElements
@@ -168,7 +191,7 @@ func getEnterPoint(vertex Vertex, graph Graph) Vertex {
 		return vertex
 	}
 	randomIndex := math.Floor(rand.ExpFloat64() * float64(len(graph.vertices)))
-
+	randomIndex = 0
 	return graph.vertices[int(randomIndex)]
 }
 
@@ -193,6 +216,7 @@ func searchLevel(vertex Vertex, enterPoints []Vertex, efSize int, level int) []V
 		}
 
 		//look for more candidates
+		fmt.Println("neighbors", nearest)
 		for _, neighbor := range nearest.neighbors {
 			if _, ok := visited[neighbor.id]; ok {
 				continue
@@ -208,7 +232,6 @@ func searchLevel(vertex Vertex, enterPoints []Vertex, efSize int, level int) []V
 				}
 			}
 		}
-
 	}
 	return closestNeighbors
 
