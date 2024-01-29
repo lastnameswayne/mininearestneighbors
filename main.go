@@ -31,6 +31,82 @@ func main() {
 	fmt.Println("hello world")
 
 	// Graph construction is first step
+	v1 := Vector{
+		id:     1,
+		vector: []int{1, 2, 3, 4, 5},
+	}
+	v2 := Vector{
+		id:     2,
+		vector: []int{2, 2, 3, 5, 5},
+	}
+	v3 := Vector{
+		id:     3,
+		vector: []int{11, 12, 13, 14, 15},
+	}
+	v4 := Vector{
+		id:     4,
+		vector: []int{1, 1, 1, 1, 1},
+	}
+	v5 := Vector{
+		id:     5,
+		vector: []int{1, 12, 3, 4, 5},
+	}
+	v6 := Vector{
+		id:     6,
+		vector: []int{1, 2, 30, 4, 5},
+	}
+	v7 := Vector{
+		id:     7,
+		vector: []int{2, 2, 3, 4, 5},
+	}
+	v8 := Vector{
+		id:     8,
+		vector: []int{10, 200, 3, 4, 5},
+	}
+
+	q := Vector{
+		id:     9,
+		vector: []int{0, 2, 3, 4, 5},
+	}
+	Graph := Graph{
+		vertices: []Vertex{},
+	}
+
+	Graph = insertVector(Graph, v1, 5)
+	Graph = insertVector(Graph, v2, 5)
+	Graph = insertVector(Graph, v3, 5)
+	Graph = insertVector(Graph, v4, 5)
+	Graph = insertVector(Graph, v5, 5)
+	Graph = insertVector(Graph, v6, 5)
+	Graph = insertVector(Graph, v7, 5)
+	Graph = insertVector(Graph, v8, 5)
+
+	fmt.Println(Graph)
+	fmt.Println("searching")
+	fmt.Println(Search(q, Graph, 5))
+}
+
+func Search(q Vector, graph Graph, efSize int, k int) []Vertex {
+	//searches for q in graph
+	//returns the closest vector to q
+	//returns the vector and its distance to q
+	//search starts at the top layer and traverses greedily to find the efSize closest neighbors to q
+	//these are used as enterPoints in the next step
+	//s
+	W := []Vertex{}
+	queryElement := Vertex{
+		vector:    q.vector,
+		id:        q.id,
+		neighbors: []Vertex{},
+	}
+	enterPoint := getEnterPoint(queryElement, graph)
+	enterPointLevel := enterPoint.level
+	for i := enterPointLevel; i > 0; i-- {
+		W = searchLevel(queryElement, []Vertex{enterPoint}, efSize, i)
+		enterPoint = getClosestArr(queryElement, W)[0]
+	}
+	W = searchLevel(queryElement, []Vertex{enterPoint}, efSize, 0)
+	return W[:k]
 }
 
 func insertVector(graph Graph, vector Vector, efSize int) Graph {
@@ -41,7 +117,6 @@ func insertVector(graph Graph, vector Vector, efSize int) Graph {
 	}
 	M := 2 // number of neighbors to add to each vertex on insertion
 	M_max := 4
-	efSize = 100 // size of the dynamic list for the nearest neighbors
 
 	enterPointHNSW := getEnterPoint(vertex, graph) //get enter point for hnsw
 	enterPointLevel := enterPointHNSW.level
