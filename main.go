@@ -23,8 +23,12 @@ type Vertex struct {
 }
 
 type Graph struct {
+	layers   map[string][]Vertex
+	entrance int
 	vertices []Vertex
 }
+
+func newHNSW(layers)
 
 func (g Graph) PrintLayers() {
 	l0 := []Vertex{}
