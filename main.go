@@ -48,23 +48,23 @@ func (v Vertex) String() string {
 	return fmt.Sprintf("id %d \n level %d \n neighbors %v \n", int(v.id), v.level, v.neighbors)
 }
 
-func (g *HNSW) Search(q Vector, efSize int, k int) []Vertex {
+// func (g *HNSW) Search(q Vector, efSize int, k int) []Vertex {
 
-	W := []Vertex{}
-	queryElement := Vertex{
-		vector:    q.vector,
-		id:        q.id,
-		neighbors: []Vertex{},
-	}
-	ep := graph.entrancePoint
-	enterPointLevel := enterPoint.level
-	for i := enterPointLevel; i > 0; i-- {
-		W = searchLevel(queryElement, []Vertex{enterPoint}, efSize, i)
-		enterPoint = getClosestArr(queryElement, W)[0]
-	}
-	W = searchLevel(queryElement, []Vertex{enterPoint}, efSize, 0)
-	return W[:k]
-}
+// 	W := []Vertex{}
+// 	queryElement := Vertex{
+// 		vector:    q.vector,
+// 		id:        q.id,
+// 		neighbors: []Vertex{},
+// 	}
+// 	ep := graph.entrancePoint
+// 	enterPointLevel := enterPoint.level
+// 	for i := enterPointLevel; i > 0; i-- {
+// 		W = searchLevel(queryElement, graph.enterPoint, efSize, i)
+// 		enterPoint = getClosest(queryElement, W)[0]
+// 	}
+// 	W = searchLevel(queryElement, []Vertex{enterPoint}, efSize, 0)
+// 	return W[:k]
+// }
 
 func insertVector(graph HNSW, queryVector Vector, efSize int) HNSW {
 	vertex := Vertex{
@@ -76,46 +76,45 @@ func insertVector(graph HNSW, queryVector Vector, efSize int) HNSW {
 	M_max := 4
 
 	enterPointHNSW := graph.entrancePoint
-	topLayer := graph.getTopLayer()
-
+	// topLayer := graph.getTopLayer()
+	top := len(graph.layers)
 	levelMultiplier := 1 / math.Log(float64(M)) // m_L = rule of thumb is mL = 1/ln(M) where M is the number neighbors we add to each vertex on insertion
 
 	// A vector is added to insertion layer and every layer below it
 	nearestElements := []Vertex{}
 
 	level := calculateLevel(levelMultiplier)
-	vertex.level = level
+	level = min(level, top)
+	layerHNSW := graph.layers[level]
+	layerHNSW[vertex.id] = append(layerHNSW[vertex.id], vertex)
 
 	//Start at the top level and traverse greedilty to find the epSize closest neighbors to vector
 	//These are used as enterPoints in the next step
-	for i := enterPointLevel; i > vertex.level; i-- {
-		nearestElements = searchLevel(vertex, enterPoint, 1, level)
-		enterPoint = getClosestArr(vertex, nearestElements)
+	for i := top; i > level+1; i-- {
+		layer := graph.layers[i]
+		nearestElements = searchLevel(vertex, layer, enterPointHNSW, 1)
+		enterPointHNSW, _ = getClosest(vertex, nearestElements)
 	}
-	fmt.Println("starting here", enterPoint[0].id)
-
 	//searches again from the next layer
-	for i := min(level, enterPoint[0].level); i > 0; i-- {
-		fmt.Println("here", level, enterPoint[0].level)
-		nearestElements = searchLevel(vertex, enterPoint, efSize, i)
+	for i := level; i > -1; i-- {
+		layer := graph.layers[i]
+		nearestElements = searchLevel(vertex, layer, enterPointHNSW, efSize)
 		neighbors := selectNeighbors(vertex, nearestElements, M, level)
 
-		//add birectional connections from neighbors to q at layer l_c
+		for _, n := range neighbors {
+			vertex, n = makeConnection(vertex, n)
+		}
+
 		for _, n := range neighbors {
 			neighbors := n.neighbors
 			if len(neighbors) > M_max {
 				newNeighbors := selectNeighbors(n, neighbors, M_max, level)
-				n.neighbors = newNeighbors
-				// vertex.neighbors = newNeighbors
+				//remove neighbors
 			}
 		}
-		enterPoint = nearestElements
+		enterPointHNSW, _ := getClosest(vertex, nearestElements)
 	}
-	if level > enterPointLevel {
-		enterPointHNSW = vertex
-	}
-
-	graph.vertices = append(graph.vertices, vertex)
+	graph.entrancePoint = enterPointHNSW
 	return graph
 }
 
@@ -135,16 +134,11 @@ func (g HNSW) getTopLayer() Graph {
 // }
 
 // query element q
-func searchLevel(vertex Vertex, enterPoints []Vertex, efSize int, level int) []Vertex {
-	visited := map[ID]bool{}
-	candidates := map[ID]Vertex{}
+func searchLevel(vertex Vertex, level Graph, entrancePoint Vertex, efSize int) []Vertex {
+	visited := map[ID]Vertex{entrancePoint.id: entrancePoint}
+	candidates := map[ID]Vertex{entrancePoint.id: entrancePoint}
 	closestNeighbors := make([]Vertex, efSize)
-
-	for _, elem := range enterPoints {
-		visited[elem.id] = true
-		candidates[elem.id] = elem
-		closestNeighbors = append(closestNeighbors, elem)
-	}
+	closestNeighbors = append(closestNeighbors, entrancePoint)
 
 	for len(candidates) > 0 {
 		nearest, nearestDist := getClosest(vertex, candidates)
@@ -161,7 +155,7 @@ func searchLevel(vertex Vertex, enterPoints []Vertex, efSize int, level int) []V
 				continue
 			}
 
-			visited[neighbor.id] = true
+			visited[neighbor.id] = neighbor // mark as seen
 			furthest, furthestDist := getFurthest(vertex, closestNeighbors)
 			if distance(neighbor, vertex) < furthestDist || len(closestNeighbors) < efSize {
 				candidates[neighbor.id] = neighbor
@@ -174,6 +168,12 @@ func searchLevel(vertex Vertex, enterPoints []Vertex, efSize int, level int) []V
 	}
 	return closestNeighbors
 
+}
+
+func makeConnection(a Vertex, b Vertex) (Vertex, Vertex) {
+	a.neighbors = append(a.neighbors, a)
+	b.neighbors = append(b.neighbors, b)
+	return a, b
 }
 
 // selects M nearest neighbors
@@ -205,20 +205,7 @@ func distance(v1 Vertex, v2 Vertex) float64 {
 	return math.Sqrt(sum)
 }
 
-func getClosestArr(vertex Vertex, candidates []Vertex) []Vertex {
-	closest := candidates[0]
-	closestDist := distance(vertex, closest)
-	for _, candidate := range candidates {
-		distance := distance(closest, candidate)
-		if distance < closestDist {
-			closest = candidate
-			closestDist = distance
-		}
-	}
-	return []Vertex{closest}
-}
-
-func getClosest(vertex Vertex, candidates map[ID]Vertex) (Vertex, float64) {
+func getClosest(vertex Vertex, candidates []Vertex) (Vertex, float64) {
 	closest := candidates[0]
 	closestDist := distance(vertex, closest)
 	for _, candidate := range candidates {
