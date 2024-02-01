@@ -18,105 +18,37 @@ type ID int
 type Vertex struct {
 	id        ID
 	neighbors []Vertex
-	level     int
 	vector    []int
 }
 
-type Graph struct {
-	layers   map[string][]Vertex
-	entrance int
-	vertices []Vertex
+type Graph map[ID][]Vertex
+
+type HNSW struct {
+	layers        map[int]Graph
+	entrancePoint Vertex
 }
 
-func newHNSW(layers)
-
-func (g Graph) PrintLayers() {
-	l0 := []Vertex{}
-	l1 := []Vertex{}
-	l2 := []Vertex{}
-
-	for _, e := range g.vertices {
-		if e.level == 0 {
-			l0 = append(l0, e)
-		}
-		if e.level == 1 {
-			l1 = append(l1, e)
-		}
-		if e.level == 2 {
-			l2 = append(l2, e)
-		}
+func ConstructHNSW() HNSW {
+	layersCount := 3
+	layers := map[int]Graph{}
+	zeroNode := Vertex{id: 0, neighbors: []Vertex{}, vector: []int{0}}
+	for i := 0; i < layersCount; i++ {
+		layers[i] = Graph{ID(0): []Vertex{zeroNode}}
 	}
-	fmt.Println("level 0", l0)
-	fmt.Println("level 1", l1)
-	fmt.Println("level 2", l2)
+	return HNSW{
+		layers:        layers,
+		entrancePoint: zeroNode,
+	}
 }
 
 func main() {
-
-	fmt.Println("hello world")
-
-	// Graph construction is first step
-	v1 := Vector{
-		id:     1,
-		vector: []int{1, 2, 3, 4, 5},
-	}
-	v2 := Vector{
-		id:     2,
-		vector: []int{2, 2, 3, 5, 5},
-	}
-	v3 := Vector{
-		id:     3,
-		vector: []int{11, 12, 13, 14, 15},
-	}
-	v4 := Vector{
-		id:     4,
-		vector: []int{1, 1, 1, 1, 1},
-	}
-	v5 := Vector{
-		id:     5,
-		vector: []int{1, 12, 3, 4, 5},
-	}
-	v6 := Vector{
-		id:     6,
-		vector: []int{1, 2, 30, 4, 5},
-	}
-	v7 := Vector{
-		id:     7,
-		vector: []int{2, 2, 3, 4, 5},
-	}
-	v8 := Vector{
-		id:     8,
-		vector: []int{10, 200, 3, 4, 5},
-	}
-
-	q := Vector{
-		id:     9,
-		vector: []int{0, 2, 3, 4, 5},
-	}
-	Graph := Graph{
-		vertices: []Vertex{},
-	}
-
-	Graph = insertVector(Graph, v1, 5)
-	Graph = insertVector(Graph, v2, 5)
-	Graph = insertVector(Graph, v3, 5)
-	Graph = insertVector(Graph, v4, 5)
-	Graph = insertVector(Graph, v5, 5)
-	Graph = insertVector(Graph, v6, 5)
-	Graph = insertVector(Graph, v7, 5)
-	Graph = insertVector(Graph, v8, 5)
-
-	Graph.PrintLayers()
-	fmt.Println("searching")
-	fmt.Println(Search(q, Graph, 5, 3))
-
 }
 
 func (v Vertex) String() string {
 	return fmt.Sprintf("id %d \n level %d \n neighbors %v \n", int(v.id), v.level, v.neighbors)
 }
 
-func Search(q Vector, graph Graph, efSize int, k int) []Vertex {
+func (g *HNSW) Search(q Vector, efSize int, k int) []Vertex {
 
 	W := []Vertex{}
 	queryElement := Vertex{
@@ -124,7 +56,7 @@ func Search(q Vector, graph Graph, efSize int, k int) []Vertex {
 		id:        q.id,
 		neighbors: []Vertex{},
 	}
-	enterPoint := getEnterPoint(queryElement, graph)
+	ep := graph.entrancePoint
 	enterPointLevel := enterPoint.level
 	for i := enterPointLevel; i > 0; i-- {
 		W = searchLevel(queryElement, []Vertex{enterPoint}, efSize, i)
@@ -134,19 +66,17 @@ func Search(q Vector, graph Graph, efSize int, k int) []Vertex {
 	return W[:k]
 }
 
-func insertVector(graph Graph, vector Vector, efSize int) Graph {
+func insertVector(graph HNSW, queryVector Vector, efSize int) HNSW {
 	vertex := Vertex{
-		vector:    vector.vector,
-		id:        vector.id,
+		vector:    queryVector.vector,
+		id:        queryVector.id,
 		neighbors: []Vertex{},
 	}
 	M := 2 // number of neighbors to add to each vertex on insertion
 	M_max := 4
 
-	enterPointHNSW := getEnterPoint(vertex, graph) //get enter point for hnsw
-	enterPointLevel := enterPointHNSW.level
-
-	enterPoint := []Vertex{enterPointHNSW}
+	enterPointHNSW := graph.entrancePoint
+	topLayer := graph.getTopLayer()
 
 	levelMultiplier := 1 / math.Log(float64(M)) // m_L = rule of thumb is mL = 1/ln(M) where M is the number neighbors we add to each vertex on insertion
 
@@ -189,15 +119,20 @@ func insertVector(graph Graph, vector Vector, efSize int) Graph {
 	return graph
 }
 
-// this can be random
-func getEnterPoint(vertex Vertex, graph Graph) Vertex {
-	if len(graph.vertices) == 0 {
-		return vertex
-	}
-	randomIndex := math.Floor(rand.ExpFloat64() * float64(len(graph.vertices)))
-	randomIndex = 0
-	return graph.vertices[int(randomIndex)]
+func (g HNSW) getTopLayer() Graph {
+	top := len(g.layers)
+	return g.layers[top-1]
 }
+
+// // this can be random
+// func getEnterPoint(vertex Vertex, graph HNSW) Vertex {
+// 	if len(graph.vertices) == 0 {
+// 		return vertex
+// 	}
+// 	randomIndex := math.Floor(rand.ExpFloat64() * float64(len(graph.vertices)))
+// 	randomIndex = 0
+// 	return graph.vertices[int(randomIndex)]
+// }
 
 // query element q
 func searchLevel(vertex Vertex, enterPoints []Vertex, efSize int, level int) []Vertex {

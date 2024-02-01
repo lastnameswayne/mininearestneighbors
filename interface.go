@@ -1,6 +1,6 @@
 package main
 
 type NN interface {
-	Insert(v Vertex, g Graph) error
-	Search(v Vertex, g Graph) Vertex
+	Insert(v Vertex, g HNSW) error
+	Search(v Vertex, g HNSW) Vertex
 }
