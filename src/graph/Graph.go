@@ -2,15 +2,17 @@ package Graph
 
 type ID int
 type Vertex struct {
-	id     ID
-	vector []int
+	Id     ID
+	Vector []int
 	Edges  map[ID]Vertex
 }
 
 type Graph map[ID]*Vertex
 
-func (g Graph) AddVertex(id int, vector []int) {
-	g[ID(id)] = &Vertex{id: ID(id), vector: vector, Edges: map[ID]Vertex{}}
+func (g Graph) AddVertex(id ID, vector []int) Vertex {
+	vertex := Vertex{Id: id, Vector: vector, Edges: map[ID]Vertex{}}
+	g[ID(id)] = &vertex
+	return vertex
 }
 
 func (g Graph) AddEdge(srcKey ID, destKey ID) bool {
@@ -28,9 +30,9 @@ func (g Graph) AddEdge(srcKey ID, destKey ID) bool {
 	return true
 }
 
-func (g Graph) Neighbors(v Vertex) []Vertex {
+func (g Graph) Neighborhood(v Vertex) []Vertex {
 	res := make([]Vertex, 0)
-	val, ok := g[v.id]
+	val, ok := g[v.Id]
 	if !ok {
 		return []Vertex{}
 	}
@@ -51,8 +53,8 @@ func (g Graph) RemoveEdge(srcKey ID, destKey ID) bool {
 		return false
 	}
 
-	delete(srcVal.Edges, destVal.id)
-	delete(destVal.Edges, srcVal.id)
+	delete(srcVal.Edges, destVal.Id)
+	delete(destVal.Edges, srcVal.Id)
 
 	return true
 }

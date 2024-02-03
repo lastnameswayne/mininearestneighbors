@@ -1,16 +1,6 @@
 package Set
 
-type IntSet interface {
-	Add(element int) bool
-	Delete(element int) bool
-	Has(element int) bool
-}
-
 type Set map[int]bool
-
-func NewSet() Set {
-	return map[int]bool{}
-}
 
 func (s Set) Add(element int) bool {
 	s[element] = true
