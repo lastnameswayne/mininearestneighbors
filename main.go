@@ -4,36 +4,27 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"mininearestneighbors/graph"
 	"sort"
 )
 
 type Vector struct {
 	// A vector is a list of integers
 	// In mesure case we also have an id
-	id     ID
+	id     int
 	vector []int
 }
-type ID int
-
-type Vertex struct {
-	id        ID
-	neighbors []Vertex
-	vector    []int
-}
-
-type Graph map[ID][]Vertex
-
 type HNSW struct {
-	layers        map[int]Graph
-	entrancePoint Vertex
+	layers        map[int]graph.Graph
+	entrancePoint graph.Vertex
 }
 
 func ConstructHNSW() HNSW {
 	layersCount := 3
 	layers := map[int]Graph{}
-	zeroNode := Vertex{id: 0, neighbors: []Vertex{}, vector: []int{0}}
+	zeroNode := Vertex{id: 0, vector: []int{0}}
 	for i := 0; i < layersCount; i++ {
-		layers[i] = Graph{ID(0): []Vertex{zeroNode}}
+		layers[i] = Graph{ID(0): &zeroNode}
 	}
 	return HNSW{
 		layers:        layers,
@@ -109,6 +100,7 @@ func insertVector(graph HNSW, queryVector Vector, efSize int) HNSW {
 			neighbors := n.neighbors
 			if len(neighbors) > M_max {
 				newNeighbors := selectNeighbors(n, neighbors, M_max, level)
+
 				//remove neighbors
 			}
 		}
