@@ -24,10 +24,11 @@ type HNSW struct {
 func ConstructHNSW() HNSW {
 	layersCount := 3
 	layers := map[int]g.Graph{}
-	zeroNode := g.Vertex{Id: 0, Vector: []int{0}, Edges: map[g.ID]g.Vertex{}}
 	for i := 0; i < layersCount; i++ {
-		layers[i] = g.Graph{g.ID(0): &zeroNode}
+		zeroNode := g.Vertex{Id: 0, Vector: []int{10000, 10000, 10000, 10000, 10000}, Edges: map[g.ID]g.Vertex{}}
+		layers[i] = g.Graph{g.ID(0): zeroNode}
 	}
+	zeroNode := g.Vertex{Id: 0, Vector: []int{10000, 10000, 10000, 10000, 10000}, Edges: map[g.ID]g.Vertex{}}
 	return HNSW{
 		layers:        layers,
 		entrancePoint: zeroNode,
@@ -85,8 +86,10 @@ func main() {
 	hnsw = insertVector(hnsw, v6, 5)
 	hnsw = insertVector(hnsw, v7, 5)
 	hnsw = insertVector(hnsw, v8, 5)
-
-	fmt.Println("searching", hnsw)
+	fmt.Println(" . ")
+	for idx, layers := range hnsw.layers {
+		fmt.Println("layer", idx, "we have", layers)
+	}
 	fmt.Println(hnsw.Search(q, 5, 3))
 
 }
@@ -99,11 +102,11 @@ func (hnsw *HNSW) Search(q Vector, efSize int, k int) s.Set {
 		Id:     g.ID(q.id),
 	}
 	ep := hnsw.entrancePoint
-	top := len(hnsw.layers)
+	top := len(hnsw.layers) - 1
 	for i := top; i > 0; i-- {
 		layer := hnsw.layers[i]
 		W = searchLayer(queryElement, layer, ep, 1)
-		ep, _ = getClosest(queryElement, W, layer)
+		ep = getClosest(queryElement, W, layer)
 	}
 	W = searchLayer(queryElement, hnsw.layers[0], ep, efSize)
 	fmt.Println("finished", W)
@@ -115,8 +118,7 @@ func insertVector(graph HNSW, queryVector Vector, efSize int) HNSW {
 	M_max := 4
 
 	enterPointHNSW := graph.entrancePoint
-	// topLayer := graph.getTopLayer()
-	top := len(graph.layers)
+	top := len(graph.layers) - 1
 	levelMultiplier := 1 / math.Log(float64(M)) // m_L = rule of thumb is mL = 1/ln(M) where M is the number neighbors we add to each vertex on insertion
 
 	// A vector is added to insertion layer and every layer below it
@@ -124,24 +126,22 @@ func insertVector(graph HNSW, queryVector Vector, efSize int) HNSW {
 
 	level := calculateLevel(levelMultiplier)
 	level = min(level, top)
-	layerHNSW := graph.layers[level]
-	queryVertex := layerHNSW.AddVertex(g.ID(queryVector.id), queryVector.vector)
+	queryVertex := g.Vertex{Id: g.ID(queryVector.id), Vector: queryVector.vector, Edges: map[g.ID]g.Vertex{}}
 
-	//Start at the top level and traverse greedilty to find the epSize closest neighbors to vector
-	//These are used as enterPoints in the next step
 	for i := top; i > level+1; i-- {
 		layer := graph.layers[i]
 		W = searchLayer(queryVertex, layer, enterPointHNSW, 1)
-		enterPointHNSW, _ = getClosest(queryVertex, W, layer)
+		enterPointHNSW = getClosest(queryVertex, W, layer)
 	}
 	//searches again from the next layer
 	for i := level; i >= 0; i-- {
 		layer := graph.layers[i]
 		W = searchLayer(queryVertex, layer, enterPointHNSW, efSize)
 		neighbors := selectNeighbors(queryVertex, W, M, layer)
+		fmt.Println("neighbors", neighbors)
 
 		for _, n := range neighbors {
-			layer.AddEdge(queryVertex.Id, n.Id)
+			layer.AddEdge(queryVertex, n)
 		}
 
 		for _, n := range neighbors {
@@ -150,51 +150,15 @@ func insertVector(graph HNSW, queryVector Vector, efSize int) HNSW {
 				asSet := verticesToSet(neighborhood)
 				newNeighbors := selectNeighbors(n, asSet, M_max, layer)
 
-				setNewNeighborhood(&n, newNeighbors, layer)
+				setNewNeighborhood(n, newNeighbors, layer)
 			}
 		}
-		enterPointHNSW, _ = getClosest(queryVertex, W, layer)
+		enterPointHNSW = getClosest(queryVertex, W, layer)
 	}
 	graph.entrancePoint = enterPointHNSW
 	return graph
 }
 
-func (g HNSW) getTopLayer() g.Graph {
-	top := len(g.layers)
-	return g.layers[top-1]
-}
-
-func verticesToSet(vertices []g.Vertex) s.Set {
-	set := s.Set{}
-	for _, v := range vertices {
-		set.Add(int(v.Id))
-	}
-
-	return set
-}
-
-func setNewNeighborhood(v *g.Vertex, neighborhood []g.Vertex, layer g.Graph) {
-	currNeighborhood := v.Edges
-	for _, n := range currNeighborhood {
-		layer.RemoveEdge(v.Id, n.Id)
-	}
-
-	for _, n := range neighborhood {
-		layer.AddEdge(v.Id, n.Id)
-	}
-}
-
-// // this can be random
-// func getEnterPoint(vertex Vertex, graph HNSW) Vertex {
-// 	if len(graph.vertices) == 0 {
-// 		return vertex
-// 	}
-// 	randomIndex := math.Floor(rand.ExpFloat64() * float64(len(graph.vertices)))
-// 	randomIndex = 0
-// 	return graph.vertices[int(randomIndex)]
-// }
-
-// query element q
 func searchLayer(vertex g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize int) s.Set {
 	visited := s.Set{}
 	visited.Add(int(entrancePoint.Id))
@@ -205,10 +169,12 @@ func searchLayer(vertex g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize 
 
 	for len(candidates) > 0 {
 		fmt.Println("candidates", candidates)
-		nearest, nearestDist := getClosest(vertex, candidates, layer)
-		_, furthestDist := getFurthest(vertex, W, layer)
+		nearest := getClosest(vertex, candidates, layer)
+		candidates.Delete(int(nearest.Id))
+		furthest := getFurthest(vertex, W, layer)
 
-		if nearestDist > furthestDist {
+		fmt.Println("nearest", nearest, distance(nearest, vertex), "for vertex", vertex.Id)
+		if distance(nearest, vertex) > distance(furthest, vertex) {
 			break //all elements in W have been evaluated
 		}
 
@@ -220,9 +186,9 @@ func searchLayer(vertex g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize 
 
 			visited.Add(int(neighbor.Id))
 
-			furthest, furthestDist := getFurthest(vertex, W, layer)
+			furthest := getFurthest(vertex, W, layer)
 
-			if distance(neighbor, vertex) < furthestDist || len(W) < efSize {
+			if distance(neighbor, vertex) < distance(vertex, furthest) || len(W) < efSize {
 				candidates.Add(int(neighbor.Id))
 				W.Add(int(neighbor.Id))
 
@@ -238,16 +204,22 @@ func searchLayer(vertex g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize 
 
 // selects M nearest neighbors
 func selectNeighbors(vertex g.Vertex, W s.Set, M int, layer g.Graph) []g.Vertex { //simple
-	vertices := make([]g.Vertex, M)
+	if W.Has(int(vertex.Id)) {
+		W.Delete(int(vertex.Id))
+	}
+
+	vertices := make([]g.Vertex, 0)
 	for id, _ := range W {
 		vertex := layer[g.ID(id)]
-		vertices = append(vertices, *vertex)
+		vertices = append(vertices, vertex)
 	}
+	fmt.Println("vertices", vertices)
 
 	sort.Slice(vertices, func(i, j int) bool {
 		return distance(vertex, vertices[i]) > distance(vertex, vertices[j])
 	})
-	return vertices[:M]
+
+	return vertices[:min(len(vertices), M)]
 }
 
 func calculateLevel(levelMultiplier float64) int {
@@ -271,40 +243,66 @@ func distance(v1 g.Vertex, v2 g.Vertex) float64 {
 	return math.Sqrt(sum)
 }
 
-func getClosest(vertex g.Vertex, candidates s.Set, level g.Graph) (g.Vertex, float64) {
+func getClosest(vertex g.Vertex, candidates s.Set, level g.Graph) g.Vertex {
 	closestDist := math.Inf(1)
-	var closest g.Vertex
+	randomId := candidates.GetRandom()
+	closest := level[g.ID(randomId)]
 	for id, _ := range candidates {
 		candidate, ok := level[g.ID(id)]
 		if !ok {
-			return g.Vertex{}, math.Inf(1)
+			return g.Vertex{}
 		}
 
-		distance := distance(closest, *candidate)
+		distance := distance(closest, candidate)
 		if distance <= closestDist || distance == math.Inf(1) {
-			closest = *candidate
+			closest = candidate
 			closestDist = distance
 		}
 	}
-	return closest, closestDist
+	return closest
 }
 
-func getFurthest(vertex g.Vertex, candidates s.Set, level g.Graph) (g.Vertex, float64) {
+func getFurthest(vertex g.Vertex, candidates s.Set, level g.Graph) g.Vertex {
 	furthestDist := math.Inf(-1)
-	var furthest g.Vertex
+	randomId := candidates.GetRandom()
+	furthest := level[g.ID(randomId)]
 	for id, _ := range candidates {
 		candidate, ok := level[g.ID(id)]
 		if !ok {
-			return g.Vertex{}, math.Inf(-1)
+			return g.Vertex{}
 		}
 
-		distance := distance(furthest, *candidate)
+		distance := distance(furthest, candidate)
 		if distance >= furthestDist || distance == math.Inf(1) {
 			furthest = vertex
 			furthestDist = distance
 		}
 	}
 
-	return furthest, furthestDist
+	return furthest
 
+}
+func (g HNSW) getTopLayer() g.Graph {
+	top := len(g.layers)
+	return g.layers[top-1]
+}
+
+func verticesToSet(vertices []g.Vertex) s.Set {
+	set := s.Set{}
+	for _, v := range vertices {
+		set.Add(int(v.Id))
+	}
+
+	return set
+}
+
+func setNewNeighborhood(v g.Vertex, neighborhood []g.Vertex, layer g.Graph) {
+	currNeighborhood := v.Edges
+	for _, n := range currNeighborhood {
+		layer.RemoveEdge(v.Id, n.Id)
+	}
+
+	for _, n := range neighborhood {
+		layer.AddEdge(v, n)
+	}
 }

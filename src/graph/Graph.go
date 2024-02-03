@@ -7,27 +7,26 @@ type Vertex struct {
 	Edges  map[ID]Vertex
 }
 
-type Graph map[ID]*Vertex
+type Graph map[ID]Vertex
 
 func (g Graph) AddVertex(id ID, vector []int) Vertex {
 	vertex := Vertex{Id: id, Vector: vector, Edges: map[ID]Vertex{}}
-	g[ID(id)] = &vertex
+	g[ID(id)] = vertex
 	return vertex
 }
 
-func (g Graph) AddEdge(srcKey ID, destKey ID) bool {
-	srcVal, ok := g[srcKey]
+func (g Graph) AddEdge(src Vertex, dest Vertex) {
+	srcVal, ok := g[src.Id]
 	if !ok {
-		return false
+		src = g.AddVertex(src.Id, src.Vector)
 	}
-	destVal, ok := g[destKey]
+	destVal, ok := g[dest.Id]
 	if !ok {
-		return false
-	}
+		dest = g.AddVertex(dest.Id, dest.Vector)
 
-	srcVal.Edges[destKey] = *destVal
-	destVal.Edges[srcKey] = *srcVal
-	return true
+	}
+	src.Edges[dest.Id] = destVal
+	dest.Edges[src.Id] = srcVal
 }
 
 func (g Graph) Neighborhood(v Vertex) []Vertex {
@@ -46,10 +45,12 @@ func (g Graph) Neighborhood(v Vertex) []Vertex {
 func (g Graph) RemoveEdge(srcKey ID, destKey ID) bool {
 	srcVal, ok := g[srcKey]
 	if !ok {
+		panic("remove edges")
 		return false
 	}
 	destVal, ok := g[destKey]
 	if !ok {
+		panic("remove edges")
 		return false
 	}
 
