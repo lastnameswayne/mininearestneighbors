@@ -35,25 +35,80 @@ func ConstructHNSW() HNSW {
 }
 
 func main() {
+	fmt.Println("hello world")
+
+	// Graph construction is first step
+	v1 := Vector{
+		id:     1,
+		vector: []int{1, 2, 3, 4, 5},
+	}
+	v2 := Vector{
+		id:     2,
+		vector: []int{2, 2, 3, 5, 5},
+	}
+	v3 := Vector{
+		id:     3,
+		vector: []int{11, 12, 13, 14, 15},
+	}
+	v4 := Vector{
+		id:     4,
+		vector: []int{1, 1, 1, 1, 1},
+	}
+	v5 := Vector{
+		id:     5,
+		vector: []int{1, 12, 3, 4, 5},
+	}
+	v6 := Vector{
+		id:     6,
+		vector: []int{1, 2, 30, 4, 5},
+	}
+	v7 := Vector{
+		id:     7,
+		vector: []int{2, 2, 3, 4, 5},
+	}
+	v8 := Vector{
+		id:     8,
+		vector: []int{10, 200, 3, 4, 5},
+	}
+
+	q := Vector{
+		id:     9,
+		vector: []int{0, 2, 3, 4, 5},
+	}
+	hnsw := ConstructHNSW()
+
+	hnsw = insertVector(hnsw, v1, 5)
+	hnsw = insertVector(hnsw, v2, 5)
+	hnsw = insertVector(hnsw, v3, 5)
+	hnsw = insertVector(hnsw, v4, 5)
+	hnsw = insertVector(hnsw, v5, 5)
+	hnsw = insertVector(hnsw, v6, 5)
+	hnsw = insertVector(hnsw, v7, 5)
+	hnsw = insertVector(hnsw, v8, 5)
+
+	fmt.Println("searching", hnsw)
+	fmt.Println(hnsw.Search(q, 5, 3))
+
 }
 
-// func (g *HNSW) Search(q Vector, efSize int, k int) []Vertex {
+func (hnsw *HNSW) Search(q Vector, efSize int, k int) s.Set {
 
-// 	W := []Vertex{}
-// 	queryElement := Vertex{
-// 		vector:    q.vector,
-// 		id:        q.id,
-// 		neighbors: []Vertex{},
-// 	}
-// 	ep := graph.entrancePoint
-// 	enterPointLevel := enterPoint.level
-// 	for i := enterPointLevel; i > 0; i-- {
-// 		W = searchLevel(queryElement, graph.enterPoint, efSize, i)
-// 		enterPoint = getClosest(queryElement, W)[0]
-// 	}
-// 	W = searchLevel(queryElement, []Vertex{enterPoint}, efSize, 0)
-// 	return W[:k]
-// }
+	W := s.Set{}
+	queryElement := g.Vertex{
+		Vector: q.vector,
+		Id:     g.ID(q.id),
+	}
+	ep := hnsw.entrancePoint
+	top := len(hnsw.layers)
+	for i := top; i > 0; i-- {
+		layer := hnsw.layers[i]
+		W = searchLayer(queryElement, layer, ep, 1)
+		ep, _ = getClosest(queryElement, W, layer)
+	}
+	W = searchLayer(queryElement, hnsw.layers[0], ep, efSize)
+	fmt.Println("finished", W)
+	return W
+}
 
 func insertVector(graph HNSW, queryVector Vector, efSize int) HNSW {
 	M := 2 // number of neighbors to add to each vertex on insertion
