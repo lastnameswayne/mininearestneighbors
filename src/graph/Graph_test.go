@@ -29,7 +29,11 @@ func TestGraph(t *testing.T) {
 		assert.NotNil(t, graph[v1.Id])
 		assert.NotNil(t, graph[v2.Id])
 
-		v1, v2 = graph.AddEdge(v1, v2)
+		graph.AddEdge(v1, v2)
+
+		// Get the vertices from the graph
+		v1 = graph[v1.Id]
+		v2 = graph[v2.Id]
 
 		assert.Equal(t, len(v1.Edges), 1)
 		assert.Equal(t, len(v2.Edges), 1)
@@ -39,11 +43,13 @@ func TestGraph(t *testing.T) {
 
 		//get neighborhood
 
-		assert.Equal(t, graph.Neighborhood(v1), graph.Neighborhood(v2))
+		assert.Equal(t, graph.Neighborhood(v1)[0], v2.Id)
+		assert.Equal(t, graph.Neighborhood(v2)[0], v1.Id)
 
 		//delete edge
 		graph.RemoveEdge(v1.Id, v2.Id)
-
+		v1 = graph[v1.Id]
+		v2 = graph[v2.Id]
 		assert.Len(t, graph.Neighborhood(v1), 0)
 		assert.Len(t, graph.Neighborhood(v2), 0)
 	})

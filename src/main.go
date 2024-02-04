@@ -90,7 +90,8 @@ func main() {
 	for idx, layers := range hnsw.layers {
 		fmt.Println("layer", idx, "we have", layers)
 	}
-	fmt.Println(hnsw.Search(q, 5, 3))
+	res := hnsw.Search(q, 5, 3)
+	fmt.Println("closes", res[0])
 
 }
 
@@ -141,7 +142,9 @@ func insertVector(graph HNSW, queryVector Vector, efSize int) HNSW {
 		fmt.Println("neighbors", neighbors)
 
 		for _, n := range neighbors {
-			queryVertex, n = layer.AddEdge(queryVertex, n)
+			layer.AddEdge(queryVertex, n)
+			queryVertex = layer[queryVertex.Id]
+			n = layer[n.Id]
 		}
 
 		for _, n := range neighbors {

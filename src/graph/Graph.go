@@ -15,19 +15,21 @@ func (g *Graph) AddVertex(id ID, vector []int) Vertex {
 	return vertex
 }
 
-func (g *Graph) AddEdge(src Vertex, dest Vertex) (Vertex, Vertex) {
+func (g *Graph) AddEdge(src Vertex, dest Vertex) {
 	srcVal, ok := (*g)[src.Id]
 	if !ok {
-		src = g.AddVertex(src.Id, src.Vector)
+		srcVal = g.AddVertex(src.Id, src.Vector)
 	}
 	destVal, ok := (*g)[dest.Id]
 	if !ok {
-		dest = g.AddVertex(dest.Id, dest.Vector)
-
+		destVal = g.AddVertex(dest.Id, dest.Vector)
 	}
 	srcVal.Edges = append(srcVal.Edges, destVal.Id)
 	destVal.Edges = append(destVal.Edges, srcVal.Id)
-	return srcVal, destVal
+
+	// Update the vertices in the graph
+	(*g)[src.Id] = srcVal
+	(*g)[dest.Id] = destVal
 }
 
 func (g *Graph) Neighborhood(v Vertex) []ID {
@@ -65,4 +67,7 @@ func (g *Graph) RemoveEdge(srcKey ID, destKey ID) {
 	}
 	srcVal.Edges = newsrcvalEdges
 	destVal.Edges = newdestvalEdges
+
+	(*g)[srcVal.Id] = srcVal
+	(*g)[destVal.Id] = destVal
 }
