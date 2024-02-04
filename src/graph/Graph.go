@@ -4,58 +4,65 @@ type ID int
 type Vertex struct {
 	Id     ID
 	Vector []int
-	Edges  map[ID]Vertex
+	Edges  []ID
 }
 
 type Graph map[ID]Vertex
 
-func (g Graph) AddVertex(id ID, vector []int) Vertex {
-	vertex := Vertex{Id: id, Vector: vector, Edges: map[ID]Vertex{}}
-	g[ID(id)] = vertex
+func (g *Graph) AddVertex(id ID, vector []int) Vertex {
+	vertex := Vertex{Id: id, Vector: vector, Edges: []ID{}}
+	(*g)[ID(id)] = vertex
 	return vertex
 }
 
-func (g Graph) AddEdge(src Vertex, dest Vertex) {
-	srcVal, ok := g[src.Id]
+func (g *Graph) AddEdge(src Vertex, dest Vertex) (Vertex, Vertex) {
+	srcVal, ok := (*g)[src.Id]
 	if !ok {
 		src = g.AddVertex(src.Id, src.Vector)
 	}
-	destVal, ok := g[dest.Id]
+	destVal, ok := (*g)[dest.Id]
 	if !ok {
 		dest = g.AddVertex(dest.Id, dest.Vector)
 
 	}
-	src.Edges[dest.Id] = destVal
-	dest.Edges[src.Id] = srcVal
+	srcVal.Edges = append(srcVal.Edges, destVal.Id)
+	destVal.Edges = append(destVal.Edges, srcVal.Id)
+	return srcVal, destVal
 }
 
-func (g Graph) Neighborhood(v Vertex) []Vertex {
-	res := make([]Vertex, 0)
-	val, ok := g[v.Id]
+func (g *Graph) Neighborhood(v Vertex) []ID {
+	val, ok := (*g)[v.Id]
 	if !ok {
-		return []Vertex{}
+		return []ID{}
 	}
-	for _, v := range val.Edges {
-		res = append(res, v)
-
-	}
-	return res
+	return val.Edges
 }
 
-func (g Graph) RemoveEdge(srcKey ID, destKey ID) bool {
-	srcVal, ok := g[srcKey]
+func (g *Graph) RemoveEdge(srcKey ID, destKey ID) {
+	srcVal, ok := (*g)[srcKey]
 	if !ok {
 		panic("remove edges")
-		return false
 	}
-	destVal, ok := g[destKey]
+	destVal, ok := (*g)[destKey]
 	if !ok {
 		panic("remove edges")
-		return false
+	}
+	newsrcvalEdges := make([]ID, 0)
+
+	for _, edge := range srcVal.Edges {
+		if destVal.Id == edge {
+			continue
+		}
+		newsrcvalEdges = append(newsrcvalEdges, edge)
 	}
 
-	delete(srcVal.Edges, destVal.Id)
-	delete(destVal.Edges, srcVal.Id)
-
-	return true
+	newdestvalEdges := make([]ID, 0)
+	for _, edge := range destVal.Edges {
+		if srcVal.Id == edge {
+			continue
+		}
+		newdestvalEdges = append(newdestvalEdges, edge)
+	}
+	srcVal.Edges = newsrcvalEdges
+	destVal.Edges = newdestvalEdges
 }
