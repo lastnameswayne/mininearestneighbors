@@ -57,7 +57,7 @@ func main() {
 	}
 	v5 := Vector{
 		id:     5,
-		vector: []int{1, 12, 3, 4, 5},
+		vector: []int{1, 1002, 3, 4, 5},
 	}
 	v6 := Vector{
 		id:     6,
@@ -90,7 +90,7 @@ func main() {
 		id:     9,
 		vector: []int{0, 2, 3, 4, 5},
 	}
-	res := hnsw.Search(q, 5, 3)
+	res := hnsw.Search(q, 3, 5)
 	fmt.Println("closest", res)
 
 }
@@ -110,6 +110,7 @@ func (hnsw *HNSW) Search(q Vector, efSize int, k int) s.Set {
 		ep = getClosest(queryElement, W, layer)
 	}
 	W = searchLayer(queryElement, hnsw.layers[0], ep, efSize)
+
 	fmt.Println("finished", W)
 	return W
 }
@@ -173,7 +174,6 @@ func searchLayer(vertex g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize 
 	W.Add(int(entrancePoint.Id))
 
 	for len(candidates) > 0 {
-		fmt.Println("candidates", candidates)
 		nearest := getClosest(vertex, candidates, layer)
 		candidates.Delete(int(nearest.Id))
 		furthest := getFurthest(vertex, W, layer)
@@ -193,13 +193,16 @@ func searchLayer(vertex g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize 
 
 			furthest := getFurthest(vertex, W, layer)
 
-			neighborVertex := layer[vertex.Id]
+			neighborVertex, ok := layer[neighbor]
+			if !ok {
+				panic("errro no neighbor found")
+			}
 			if distance(neighborVertex, vertex) < distance(vertex, furthest) || len(W) < efSize {
 				candidates.Add(int(neighbor))
 				W.Add(int(neighbor))
 
 				if len(W) > efSize {
-					layer.RemoveEdge(entrancePoint.Id, furthest.Id)
+					W.Delete(int(getFurthest(vertex, W, layer).Id))
 				}
 			}
 		}
