@@ -36,6 +36,8 @@ func ConstructHNSW(layerAmount int) HNSW {
 
 func main() {
 	fmt.Println("hello world")
+	Read()
+	return
 	//parameters
 	layerCount := 10
 	M := 5

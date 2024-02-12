@@ -1,0 +1,108 @@
+[
+  {
+    $project: {
+      ssenseproductId: 1,
+      // Exclude the _id field if not needed
+      SizesArrayChest: {
+        $filter: {
+          input: "$measurements",
+          as: "measurement",
+          cond: {
+            $eq: ["$$measurement.name", "Chest"],
+          },
+        },
+      },
+      SizesArrayShoulder: {
+        $filter: {
+          input: "$measurements",
+          as: "measurement",
+          cond: {
+            $eq: [
+              "$$measurement.name",
+              "Shoulder",
+            ],
+          },
+        },
+      },
+      SizesArrayLength: {
+        $filter: {
+          input: "$measurements",
+          as: "measurement",
+          cond: {
+            $eq: ["$$measurement.name", "Length"],
+          },
+        },
+      },
+      SizesArraySleeveLength: {
+        $filter: {
+          input: "$measurements",
+          as: "measurement",
+          cond: {
+            $eq: [
+              "$$measurement.name",
+              "Sleeve Length",
+            ],
+          },
+        },
+      },
+      // Add similar lines for other measurements as needed
+    },
+  },
+  {
+    $project: {
+      ssenseproductId: 1,
+      // Exclude the _id field if not needed
+      name: 1,
+      url: 1,
+      image: 1,
+      priceByCountry: 1,
+      brand: 1,
+      Chest: {
+        name: "Chest",
+        sizes: {
+          $objectToArray: {
+            $arrayElemAt: [
+              "$SizesArrayChest.sizes",
+              0,
+            ],
+          },
+        },
+      },
+      Shoulder: {
+        name: "Shoulder",
+        sizes: {
+          $objectToArray: {
+            $arrayElemAt: [
+              "$SizesArrayShoulder.sizes",
+              0,
+            ],
+          },
+        },
+      },
+      SleeveLength: {
+        name: "Sleeve Length",
+        sizes: {
+          $objectToArray: {
+            $arrayElemAt: [
+              "$SizesArraySleeveLength.sizes",
+              0,
+            ],
+          },
+        },
+      },
+      Length: {
+        name: "Length",
+        sizes: {
+          $objectToArray: {
+            $arrayElemAt: [
+              "$SizesArrayLength.sizes",
+              0,
+            ],
+          },
+        },
+      },
+
+      // Add similar lines for other measurements as needed
+    },
+  },
+]
