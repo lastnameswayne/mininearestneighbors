@@ -21,10 +21,9 @@ type HNSW struct {
 	entrancePoint g.Vertex
 }
 
-func ConstructHNSW() HNSW {
-	layersCount := 3
+func ConstructHNSW(layerAmount int) HNSW {
 	layers := map[int]g.Graph{}
-	for i := 0; i < layersCount; i++ {
+	for i := 0; i < layerAmount; i++ {
 		zeroNode := g.Vertex{Id: 0, Vector: []int{10000, 10000, 10000, 10000, 10000}, Edges: []g.ID{}}
 		layers[i] = g.Graph{g.ID(0): zeroNode}
 	}
@@ -37,6 +36,11 @@ func ConstructHNSW() HNSW {
 
 func main() {
 	fmt.Println("hello world")
+	//parameters
+	layerCount := 10
+	M := 5
+	mMax := 2 * M //recommended
+	efSize := 5
 
 	// Graph construction is first step
 	v1 := Vector{
@@ -71,17 +75,23 @@ func main() {
 		id:     8,
 		vector: []int{10, 200, 3, 4, 5},
 	}
+	v10 := Vector{
+		id:     10,
+		vector: []int{10, 2, 3, 4, 5},
+	}
+	v11 := Vector{
+		id:     11,
+		vector: []int{0, 2, 300000, 4, 5},
+	}
 
-	hnsw := ConstructHNSW()
+	hnsw := ConstructHNSW(layerCount)
 
-	hnsw = insertVector(hnsw, v1, 5)
-	hnsw = insertVector(hnsw, v2, 5)
-	hnsw = insertVector(hnsw, v3, 5)
-	hnsw = insertVector(hnsw, v4, 5)
-	hnsw = insertVector(hnsw, v5, 5)
-	hnsw = insertVector(hnsw, v6, 5)
-	hnsw = insertVector(hnsw, v7, 5)
-	hnsw = insertVector(hnsw, v8, 5)
+	vs := []Vector{v1, v2, v3, v4, v5, v6, v7, v8, v10, v11}
+
+	for _, vector := range vs {
+		hnsw = insertVector(hnsw, vector, efSize, M, mMax)
+	}
+
 	fmt.Println(" . ")
 	for idx, layers := range hnsw.layers {
 		fmt.Println("layer", idx, "we have", layers)
@@ -90,14 +100,13 @@ func main() {
 		id:     9,
 		vector: []int{0, 2, 3, 4, 5},
 	}
-	res := hnsw.Search(q, 10, 5)
+	res := hnsw.Search(q, efSize, 3)
 
 	for _, vertex := range res {
 		fmt.Println("id", vertex.Id, "has distance", distance(vertex.Vector, q.vector))
 	}
 
 	fmt.Println("the correct is")
-	vs := []Vector{v1, v2, v3, v4, v5, v6, v7, v8}
 	for _, vector := range vs {
 		fmt.Println("id", vector.id, "has distance", distance(vector.vector, q.vector))
 	}
@@ -138,10 +147,7 @@ func getKClosest(W s.Set, vertex g.Vertex, k int, layer g.Graph) []g.Vertex {
 	return vertices[:min(len(vertices), k)]
 }
 
-func insertVector(graph HNSW, queryVector Vector, efSize int) HNSW {
-	M := 2 // number of neighbors to add to each vertex on insertion
-	M_max := 4
-
+func insertVector(graph HNSW, queryVector Vector, efSize int, M int, mMax int) HNSW {
 	enterPointHNSW := graph.entrancePoint
 	top := len(graph.layers) - 1
 	levelMultiplier := 1 / math.Log(float64(M)) // m_L = rule of thumb is mL = 1/ln(M) where M is the number neighbors we add to each vertex on insertion
@@ -173,9 +179,9 @@ func insertVector(graph HNSW, queryVector Vector, efSize int) HNSW {
 
 		for _, n := range neighbors {
 			neighborhood := layer.Neighborhood(n)
-			if len(neighborhood) > M_max {
+			if len(neighborhood) > mMax {
 				asSet := verticesToSet(neighborhood)
-				newNeighbors := selectNeighbors(n, asSet, M_max, layer)
+				newNeighbors := selectNeighbors(n, asSet, mMax, layer)
 
 				setNewNeighborhood(n, newNeighbors, layer)
 			}
