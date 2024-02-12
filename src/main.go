@@ -90,12 +90,21 @@ func main() {
 		id:     9,
 		vector: []int{0, 2, 3, 4, 5},
 	}
-	res := hnsw.Search(q, 3, 5)
-	fmt.Println("closest", res)
+	res := hnsw.Search(q, 10, 5)
+
+	for _, vertex := range res {
+		fmt.Println("id", vertex.Id, "has distance", distance(vertex.Vector, q.vector))
+	}
+
+	fmt.Println("the correct is")
+	vs := []Vector{v1, v2, v3, v4, v5, v6, v7, v8}
+	for _, vector := range vs {
+		fmt.Println("id", vector.id, "has distance", distance(vector.vector, q.vector))
+	}
 
 }
 
-func (hnsw *HNSW) Search(q Vector, efSize int, k int) s.Set {
+func (hnsw *HNSW) Search(q Vector, efSize int, k int) []g.Vertex {
 
 	W := s.Set{}
 	queryElement := g.Vertex{
@@ -110,10 +119,23 @@ func (hnsw *HNSW) Search(q Vector, efSize int, k int) s.Set {
 		ep = getClosest(queryElement, W, layer)
 	}
 	W = searchLayer(queryElement, hnsw.layers[0], ep, efSize)
+	fmt.Println(W)
+	return getKClosest(W, queryElement, k, hnsw.layers[0])
+}
 
-	fmt.Println("finished", W)
-	W = getKClosest(W, k)
-	return W
+func getKClosest(W s.Set, vertex g.Vertex, k int, layer g.Graph) []g.Vertex {
+	vertices := make([]g.Vertex, 0)
+	for id, _ := range W {
+		vertex := layer[g.ID(id)]
+		vertices = append(vertices, vertex)
+	}
+	fmt.Println("vertices", vertices)
+
+	sort.Slice(vertices, func(i, j int) bool {
+		return distance(vertex.Vector, vertices[i].Vector) > distance(vertex.Vector, vertices[j].Vector)
+	})
+
+	return vertices[:min(len(vertices), k)]
 }
 
 func insertVector(graph HNSW, queryVector Vector, efSize int) HNSW {
@@ -179,8 +201,8 @@ func searchLayer(vertex g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize 
 		candidates.Delete(int(nearest.Id))
 		furthest := getFurthest(vertex, W, layer)
 
-		fmt.Println("nearest", nearest, distance(nearest, vertex), "for vertex", vertex.Id)
-		if distance(nearest, vertex) > distance(furthest, vertex) {
+		fmt.Println("nearest", nearest, distance(nearest.Vector, vertex.Vector), "for vertex", vertex.Id)
+		if distance(nearest.Vector, vertex.Vector) > distance(furthest.Vector, vertex.Vector) {
 			break //all elements in W have been evaluated
 		}
 
@@ -198,7 +220,7 @@ func searchLayer(vertex g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize 
 			if !ok {
 				panic("errro no neighbor found")
 			}
-			if distance(neighborVertex, vertex) < distance(vertex, furthest) || len(W) < efSize {
+			if distance(neighborVertex.Vector, vertex.Vector) < distance(vertex.Vector, furthest.Vector) || len(W) < efSize {
 				candidates.Add(int(neighbor))
 				W.Add(int(neighbor))
 
@@ -226,7 +248,7 @@ func selectNeighbors(vertex g.Vertex, W s.Set, M int, layer g.Graph) []g.Vertex 
 	fmt.Println("vertices", vertices)
 
 	sort.Slice(vertices, func(i, j int) bool {
-		return distance(vertex, vertices[i]) > distance(vertex, vertices[j])
+		return distance(vertex.Vector, vertices[i].Vector) > distance(vertex.Vector, vertices[j].Vector)
 	})
 
 	return vertices[:min(len(vertices), M)]
@@ -244,13 +266,13 @@ func calculateLevel(levelMultiplier float64) int {
 	return int(level)
 }
 
-func distance(v1 g.Vertex, v2 g.Vertex) float64 {
-	if len(v1.Vector) != len(v2.Vector) {
+func distance(v1 []int, v2 []int) float64 {
+	if len(v1) != len(v2) {
 		return math.Inf(1) // or any other error handling
 	}
 	sum := 0.0
-	for i := 0; i < len(v1.Vector); i++ {
-		diff := float64(v1.Vector[i] - v2.Vector[i])
+	for i := 0; i < len(v1); i++ {
+		diff := float64(v1[i] - v2[i])
 		sum += diff * diff
 	}
 	return math.Sqrt(sum)
@@ -266,7 +288,7 @@ func getClosest(vertex g.Vertex, candidates s.Set, level g.Graph) g.Vertex {
 			return g.Vertex{}
 		}
 
-		distance := distance(vertex, candidate)
+		distance := distance(vertex.Vector, candidate.Vector)
 		if distance <= closestDist || distance == math.Inf(1) {
 			closest = candidate
 			closestDist = distance
@@ -285,7 +307,7 @@ func getFurthest(vertex g.Vertex, candidates s.Set, level g.Graph) g.Vertex {
 			return g.Vertex{}
 		}
 
-		distance := distance(vertex, candidate)
+		distance := distance(vertex.Vector, candidate.Vector)
 		if distance > furthestDist || distance == math.Inf(1) {
 			furthest = candidate
 			furthestDist = distance
