@@ -112,6 +112,7 @@ func (hnsw *HNSW) Search(q Vector, efSize int, k int) s.Set {
 	W = searchLayer(queryElement, hnsw.layers[0], ep, efSize)
 
 	fmt.Println("finished", W)
+	W = getKClosest(W, k)
 	return W
 }
 

@@ -9,11 +9,7 @@ func buildGraphForTest() {
 
 }
 
-func test_package(*testing testing) {
-
-	fmt.Println("hello world")
-
-	// Graph construction is first step
+func TestSearch(t *testing.T) {
 	v1 := Vector{
 		id:     1,
 		vector: []int{1, 2, 3, 4, 5},
@@ -28,11 +24,11 @@ func test_package(*testing testing) {
 	}
 	v4 := Vector{
 		id:     4,
-		vector: []int{1, 1, 1, 1, 1},
+		vector: []int{10000, 10000, 10000, 10000, 10000},
 	}
 	v5 := Vector{
 		id:     5,
-		vector: []int{1, 12, 3, 4, 5},
+		vector: []int{1, 1002, 3, 4, 5},
 	}
 	v6 := Vector{
 		id:     6,
@@ -47,10 +43,6 @@ func test_package(*testing testing) {
 		vector: []int{10, 200, 3, 4, 5},
 	}
 
-	q := Vector{
-		id:     9,
-		vector: []int{0, 2, 3, 4, 5},
-	}
 	hnsw := ConstructHNSW()
 
 	hnsw = insertVector(hnsw, v1, 5)
@@ -65,14 +57,21 @@ func test_package(*testing testing) {
 	for idx, layers := range hnsw.layers {
 		fmt.Println("layer", idx, "we have", layers)
 	}
+
+	q := Vector{
+		id:     9,
+		vector: []int{0, 2, 3, 4, 5},
+	}
+
+	res := hnsw.Search(q, 3, 5)
+	fmt.Println("closest", res)
 	fmt.Println(hnsw.Search(q, 5, 3))
-
 }
 
-func test_search() {
+// func TestSearchLayer() {
 
-}
+// }
 
-func test_buildNeighbors() {
+// func TestBuildN() {
 
-}
+// }
