@@ -14,6 +14,7 @@ type Vector struct {
 	// A vector is a list of integers
 	// In mesure case we also have an id
 	id     int
+	size   string
 	vector []int
 }
 type HNSW struct {

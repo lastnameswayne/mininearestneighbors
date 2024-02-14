@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,11 +27,13 @@ type Measurement struct {
 }
 
 type SizeKeyValue struct {
-	K string `json:"k"`
-	V struct {
-		Cm   MeasurementValue `json:"cm"`
-		Inch MeasurementValue `json:"inch"`
-	} `json:"v"`
+	K string           `json:"k"`
+	V MeasurementGroup `json:"v"`
+}
+
+type MeasurementGroup struct {
+	Cm   MeasurementValue `json:"cm"`
+	Inch MeasurementValue `json:"inch"`
 }
 
 type MeasurementValue struct {
@@ -53,11 +56,53 @@ func Read() {
 		if err := cursor.Decode(&result); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("%+v\n", result)
+		resultMapped := mapToVector(result)
+		fmt.Printf("%+v\n", resultMapped)
+		return
 	}
 	if err := cursor.Err(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func mapToVector(m ProductMeasurements) []Vector {
+	ssenseID, err := strconv.ParseInt(m.SSenseProductID, 10, 64)
+	if err != nil {
+		panic(err)
+	}
+
+	measurements := []Measurement{m.Chest, m.Length, m.Shoulder, m.SleeveLength}
+
+	return mapMeasurement(measurements, int(ssenseID))
+
+}
+
+func mapMeasurement(measurements []Measurement, ssenseID int) []Vector {
+	res := []Vector{}
+
+	sizeToInts := fillMap(measurements)
+	for size, vals := range sizeToInts {
+		vector := Vector{
+			id:     ssenseID,
+			size:   size,
+			vector: vals,
+		}
+		res = append(res, vector)
+	}
+
+	return res
+}
+
+func fillMap(measurements []Measurement) map[string][]int {
+	sizeToInts := map[string][]int{}
+	for _, m := range measurements {
+		for _, size := range m.Sizes {
+			sizeToInts[size.K] = append(sizeToInts[size.K], int(size.V.Cm.Value))
+		}
+
+	}
+
+	return sizeToInts
 }
 
 func newClient(mongoConfig MongoConfig) (*mongo.Client, error) {
