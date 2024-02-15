@@ -50,18 +50,37 @@ type ProductMeasurements struct {
 }
 
 func Read() {
+	layerCount := 30
+	M := 5
+	mMax := 2 * M //recommended
+	efSize := 5
+	hnsw := ConstructHNSW(layerCount)
 	cursor := fetch()
+
 	for cursor.Next(context.TODO()) {
 		var result ProductMeasurements
 		if err := cursor.Decode(&result); err != nil {
 			log.Fatal(err)
 		}
 		resultMapped := mapToVector(result)
-		fmt.Printf("%+v\n", resultMapped)
-		return
+		for _, vector := range resultMapped {
+			hnsw = InsertVector(hnsw, vector, efSize, M, mMax)
+			fmt.Println("inserted", vector.id, vector.size)
+		}
 	}
 	if err := cursor.Err(); err != nil {
 		log.Fatal(err)
+	}
+	fmt.Println("Done")
+	fmt.Println(hnsw)
+	ints := []int{63, 71, 51, 50}
+	q := Vector{
+		id:     123,
+		vector: ints,
+	}
+	res := hnsw.Search(q, efSize, 10)
+	for _, vertex := range res {
+		fmt.Println("id", vertex.Id, "has distance", distance(vertex.Vector, q.vector))
 	}
 }
 

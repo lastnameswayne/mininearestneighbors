@@ -92,10 +92,9 @@ func main() {
 	vs := []Vector{v1, v2, v3, v4, v5, v6, v7, v8, v10, v11}
 
 	for _, vector := range vs {
-		hnsw = insertVector(hnsw, vector, efSize, M, mMax)
+		hnsw = InsertVector(hnsw, vector, efSize, M, mMax)
 	}
 
-	fmt.Println(" . ")
 	for idx, layers := range hnsw.layers {
 		fmt.Println("layer", idx, "we have", layers)
 	}
@@ -131,7 +130,6 @@ func (hnsw *HNSW) Search(q Vector, efSize int, k int) []g.Vertex {
 		ep = getClosest(queryElement, W, layer)
 	}
 	W = searchLayer(queryElement, hnsw.layers[0], ep, efSize)
-	fmt.Println(W)
 	return getKClosest(W, queryElement, k, hnsw.layers[0])
 }
 
@@ -141,7 +139,6 @@ func getKClosest(W s.Set, vertex g.Vertex, k int, layer g.Graph) []g.Vertex {
 		vertex := layer[g.ID(id)]
 		vertices = append(vertices, vertex)
 	}
-	fmt.Println("vertices", vertices)
 
 	sort.Slice(vertices, func(i, j int) bool {
 		return distance(vertex.Vector, vertices[i].Vector) > distance(vertex.Vector, vertices[j].Vector)
@@ -150,7 +147,7 @@ func getKClosest(W s.Set, vertex g.Vertex, k int, layer g.Graph) []g.Vertex {
 	return vertices[:min(len(vertices), k)]
 }
 
-func insertVector(graph HNSW, queryVector Vector, efSize int, M int, mMax int) HNSW {
+func InsertVector(graph HNSW, queryVector Vector, efSize int, M int, mMax int) HNSW {
 	enterPointHNSW := graph.entrancePoint
 	top := len(graph.layers) - 1
 	levelMultiplier := 1 / math.Log(float64(M)) // m_L = rule of thumb is mL = 1/ln(M) where M is the number neighbors we add to each vertex on insertion
@@ -172,7 +169,6 @@ func insertVector(graph HNSW, queryVector Vector, efSize int, M int, mMax int) H
 		layer := graph.layers[i]
 		W = searchLayer(queryVertex, layer, enterPointHNSW, efSize)
 		neighbors := selectNeighbors(queryVertex, W, M, layer)
-		fmt.Println("neighbors", neighbors)
 
 		for _, n := range neighbors {
 			layer.AddEdge(queryVertex, n)
@@ -210,7 +206,6 @@ func searchLayer(vertex g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize 
 		candidates.Delete(int(nearest.Id))
 		furthest := getFurthest(vertex, W, layer)
 
-		fmt.Println("nearest", nearest, distance(nearest.Vector, vertex.Vector), "for vertex", vertex.Id)
 		if distance(nearest.Vector, vertex.Vector) > distance(furthest.Vector, vertex.Vector) {
 			break //all elements in W have been evaluated
 		}
@@ -254,7 +249,6 @@ func selectNeighbors(vertex g.Vertex, W s.Set, M int, layer g.Graph) []g.Vertex 
 		vertex := layer[g.ID(id)]
 		vertices = append(vertices, vertex)
 	}
-	fmt.Println("vertices", vertices)
 
 	sort.Slice(vertices, func(i, j int) bool {
 		return distance(vertex.Vector, vertices[i].Vector) > distance(vertex.Vector, vertices[j].Vector)
