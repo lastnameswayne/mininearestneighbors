@@ -1,4 +1,4 @@
-package main
+package fetch
 
 import (
 	"slices"
@@ -65,21 +65,21 @@ func TestMapToVector(t *testing.T) {
 
 		// Assert that each vector has the correct size and measurements
 		for _, vector := range vectors {
-			assert.Equal(t, 4, len(vector.vector)) // Each vector should have 4 measurements
+			assert.Equal(t, 4, len(vector.Vector)) // Each vector should have 4 measurements
 
-			res := vector.vector
+			res := vector.Vector
 			slices.Sort(res)
 
-			if vector.size == "S" {
+			if vector.Size == "S" {
 				assert.Equal(t, res, expectedSVector)
 			}
-			if vector.size == "M" {
+			if vector.Size == "M" {
 				assert.Equal(t, res, expectedMVector)
 			}
-			if vector.size == "L" {
+			if vector.Size == "L" {
 				assert.Equal(t, res, expectedLVector)
 			}
-			if vector.size == "XL" {
+			if vector.Size == "XL" {
 				assert.Equal(t, res, expectedXLVector)
 			}
 		}

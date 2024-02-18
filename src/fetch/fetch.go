@@ -1,4 +1,4 @@
-package main
+package fetch
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 
+	h "github.com/lastnameswayne/mininearestneighbors/src/hnsw"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -54,7 +55,7 @@ func Read() {
 	M := 5
 	mMax := 2 * M //recommended
 	efSize := 5
-	hnsw := ConstructHNSW(layerCount)
+	hnsw := h.ConstructHNSW(layerCount)
 	cursor := fetch()
 
 	for cursor.Next(context.TODO()) {
@@ -64,8 +65,8 @@ func Read() {
 		}
 		resultMapped := mapToVector(result)
 		for _, vector := range resultMapped {
-			hnsw = InsertVector(hnsw, vector, efSize, M, mMax)
-			fmt.Println("inserted", vector.id, vector.size)
+			hnsw = h.InsertVector(hnsw, vector, efSize, M, mMax)
+			fmt.Println("inserted", vector.Id, vector.Size)
 		}
 	}
 	if err := cursor.Err(); err != nil {
@@ -73,18 +74,15 @@ func Read() {
 	}
 	fmt.Println("Done")
 	fmt.Println(hnsw)
-	ints := []int{63, 71, 51, 50}
-	q := Vector{
-		id:     123,
-		vector: ints,
-	}
-	res := hnsw.Search(q, efSize, 10)
-	for _, vertex := range res {
-		fmt.Println("id", vertex.Id, "has distance", distance(vertex.Vector, q.vector))
-	}
+	// ints := []int{63, 71, 51, 50}
+	// q := h.Vector{
+	// 	Id:     123,
+	// 	Vector: ints,
+	// }
+	// res := hnsw.Search(q, efSize, 10)
 }
 
-func mapToVector(m ProductMeasurements) []Vector {
+func mapToVector(m ProductMeasurements) []h.Vector {
 	ssenseID, err := strconv.ParseInt(m.SSenseProductID, 10, 64)
 	if err != nil {
 		panic(err)
@@ -96,15 +94,15 @@ func mapToVector(m ProductMeasurements) []Vector {
 
 }
 
-func mapMeasurement(measurements []Measurement, ssenseID int) []Vector {
-	res := []Vector{}
+func mapMeasurement(measurements []Measurement, ssenseID int) []h.Vector {
+	res := []h.Vector{}
 
 	sizeToInts := fillMap(measurements)
 	for size, vals := range sizeToInts {
-		vector := Vector{
-			id:     ssenseID,
-			size:   size,
-			vector: vals,
+		vector := h.Vector{
+			Id:     ssenseID,
+			Size:   size,
+			Vector: vals,
 		}
 		res = append(res, vector)
 	}

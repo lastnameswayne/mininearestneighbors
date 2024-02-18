@@ -1,4 +1,4 @@
-package main
+package hnsw
 
 // type NN interface {
 // 	Insert(v Vertex, g HNSW) error
