@@ -35,7 +35,6 @@ func ConstructHNSW(layerAmount int) HNSW {
 }
 
 func (hnsw *HNSW) Search(q Vector, efSize int, k int) []g.Vertex {
-
 	W := s.Set{}
 	queryElement := g.Vertex{
 		Vector: q.Vector,
@@ -66,9 +65,9 @@ func getKClosest(W s.Set, vertex g.Vertex, k int, layer g.Graph) []g.Vertex {
 	return vertices[:min(len(vertices), k)]
 }
 
-func InsertVector(graph HNSW, queryVector Vector, efSize int, M int, mMax int) HNSW {
-	enterPointHNSW := graph.entrancePoint
-	top := len(graph.layers) - 1
+func (h HNSW) InsertVector(queryVector Vector, efSize int, M int, mMax int) HNSW {
+	enterPointHNSW := h.entrancePoint
+	top := len(h.layers) - 1
 	levelMultiplier := 1 / math.Log(float64(M)) // m_L = rule of thumb is mL = 1/ln(M) where M is the number neighbors we add to each vertex on insertion
 
 	// A vector is added to insertion layer and every layer below it
@@ -79,13 +78,13 @@ func InsertVector(graph HNSW, queryVector Vector, efSize int, M int, mMax int) H
 	queryVertex := g.Vertex{Id: g.ID(queryVector.Id), Vector: queryVector.Vector, Edges: []g.ID{}}
 
 	for i := top; i > level+1; i-- {
-		layer := graph.layers[i]
+		layer := h.layers[i]
 		W = searchLayer(queryVertex, layer, enterPointHNSW, 1)
 		enterPointHNSW = getClosest(queryVertex, W, layer)
 	}
 
 	for i := level; i >= 0; i-- {
-		layer := graph.layers[i]
+		layer := h.layers[i]
 		W = searchLayer(queryVertex, layer, enterPointHNSW, efSize)
 		neighbors := selectNeighbors(queryVertex, W, M, layer)
 
@@ -107,9 +106,9 @@ func InsertVector(graph HNSW, queryVector Vector, efSize int, M int, mMax int) H
 		enterPointHNSW = getClosest(queryVertex, W, layer)
 	}
 	if level > top {
-		graph.entrancePoint = enterPointHNSW
+		h.entrancePoint = enterPointHNSW
 	}
-	return graph
+	return h
 }
 
 func searchLayer(vertex g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize int) s.Set {
@@ -157,7 +156,6 @@ func searchLayer(vertex g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize 
 
 }
 
-// selects M nearest neighbors
 func selectNeighbors(vertex g.Vertex, W s.Set, M int, layer g.Graph) []g.Vertex { //simple
 	if W.Has(int(vertex.Id)) {
 		W.Delete(int(vertex.Id))
