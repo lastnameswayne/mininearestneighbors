@@ -89,9 +89,9 @@ func (hnsw hnsw) InsertVector(queryVector Vector, efSize int, M int, mMax int) h
 				setNewNeighborhood(n, newNeighbors, layer)
 			}
 		}
-		enterPointHNSW = getClosest(queryVertex, W, layer)
 	}
 	if level == top {
+		enterPointHNSW = getClosest(queryVertex, W, hnsw.getTopLayer())
 		hnsw.entrancePoint = enterPointHNSW
 	}
 	fmt.Println(enterPointHNSW)
