@@ -73,7 +73,7 @@ func TestSearchLayer(t *testing.T) {
 
 }
 
-func constructTestHNSW() HNSW {
+func constructTestHNSW() hnsw {
 	// Graph construction is first step
 	v1 := Vector{
 		Id:     1,

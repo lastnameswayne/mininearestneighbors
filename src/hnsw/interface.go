@@ -1,6 +1,8 @@
 package hnsw
 
-// type NN interface {
-// 	Insert(v Vertex, g HNSW) error
-// 	Search(v Vertex, g HNSW) Vertex
-// }
+import g "github.com/lastnameswayne/mininearestneighbors/src/graph"
+
+type HNSW interface {
+	InsertVector(queryVector Vector, efSize int, M int, mMax int) hnsw
+	Search(q Vector, efSize int, k int) []g.Vertex
+}

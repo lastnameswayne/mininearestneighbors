@@ -65,7 +65,7 @@ func Read() {
 		}
 		resultMapped := mapToVector(result)
 		for _, vector := range resultMapped {
-			hnsw = h.InsertVector(hnsw, vector, efSize, M, mMax)
+			hnsw = hnsw.InsertVector(vector, efSize, M, mMax)
 			fmt.Println("inserted", vector.Id, vector.Size)
 		}
 	}
