@@ -74,12 +74,13 @@ func Read() {
 		log.Fatal(err)
 	}
 	fmt.Println("Done")
-	// ints := []int{63, 71, 51, 50}
-	// q := h.Vector{
-	// 	Id:     123,
-	// 	Vector: ints,
-	// }
-	// res := hnsw.Search(q, efSize, 10)
+	ints := []int{63, 71, 51, 50}
+	q := h.Vector{
+		Id:     123,
+		Vector: ints,
+	}
+	res := hnsw.Search(q, efSize, 10)
+	fmt.Println(res)
 }
 
 func mapToVector(m ProductMeasurements) []h.Vector {
@@ -140,7 +141,6 @@ func sizecode(size string) int {
 		return 1
 	case "XXS", "42":
 		return 0
-
 	default:
 		return 10
 	}

@@ -47,13 +47,15 @@ func TestInsertPoint(t *testing.T) {
 		assert.True(t, found)
 	})
 
-	t.Run("vect", func(t *testing.T) {
+	t.Run("inserting five vectors has five in the bottom layer", func(t *testing.T) {
+		hnsw := constructTestHNSW()
+
+		assert.Len(t, hnsw.layers[0], 5)
 
 	})
 }
 
 func TestSearchLayer(t *testing.T) {
-
 	hnsw := constructTestHNSW()
 
 	q := g.Vertex{
