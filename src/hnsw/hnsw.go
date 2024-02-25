@@ -24,7 +24,7 @@ type HNSW struct {
 func ConstructHNSW(layerAmount int) HNSW {
 	layers := map[int]g.Graph{}
 	for i := 0; i < layerAmount; i++ {
-		zeroNode := g.Vertex{Id: 0, Vector: []int{10000, 10000, 10000, 10000, 10000}, Edges: []g.ID{}}
+		zeroNode := g.Vertex{Id: 0, Vector: []int{100000000, 10000, 10000, 10000, 10000}, Edges: []g.ID{}}
 		layers[i] = g.Graph{g.ID(0): zeroNode}
 	}
 	zeroNode := g.Vertex{Id: 0, Vector: []int{10000, 10000, 10000, 10000, 10000}, Edges: []g.ID{}}
@@ -68,7 +68,7 @@ func getKClosest(W s.Set, vertex g.Vertex, k int, layer g.Graph) []g.Vertex {
 func (h HNSW) InsertVector(queryVector Vector, efSize int, M int, mMax int) HNSW {
 	enterPointHNSW := h.entrancePoint
 	top := len(h.layers) - 1
-	levelMultiplier := 1 / math.Log(float64(M)) // m_L = rule of thumb is mL = 1/ln(M) where M is the number neighbors we add to each vertex on insertion
+	levelMultiplier := 1 / math.Log(float64(M)) // rule of thumb is mL = 1/ln(M) where M is the number neighbors we add to each vertex on insertion
 
 	// A vector is added to insertion layer and every layer below it
 	W := s.Set{}
@@ -111,21 +111,17 @@ func (h HNSW) InsertVector(queryVector Vector, efSize int, M int, mMax int) HNSW
 	return h
 }
 
-func searchLayer(vertex g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize int) s.Set {
-	visited := s.Set{}
-	visited.Add(int(entrancePoint.Id))
-	candidates := s.Set{}
-	candidates.Add(int(entrancePoint.Id))
-	W := s.Set{}
-	W.Add(int(entrancePoint.Id))
+func searchLayer(query g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize int) s.Set {
+	visited, candidates, W := initSearchLayerSets(entrancePoint.Id)
 
 	for len(candidates) > 0 {
-		nearest := getClosest(vertex, candidates, layer)
-		candidates.Delete(int(nearest.Id))
-		furthest := getFurthest(vertex, W, layer)
+		nearest := getClosest(query, candidates, layer)
+		furthest := getFurthest(query, W, layer)
 
-		if distance(nearest.Vector, vertex.Vector) > distance(furthest.Vector, vertex.Vector) {
-			break //all elements in W have been evaluated
+		candidates.Delete(int(nearest.Id))
+
+		if distance(nearest.Vector, query.Vector) > distance(furthest.Vector, query.Vector) {
+			break //all elements in a layer have been evaluated
 		}
 
 		neighborhood := layer.Neighborhood(nearest)
@@ -136,23 +132,32 @@ func searchLayer(vertex g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize 
 
 			visited.Add(int(neighbor))
 
-			furthest := getFurthest(vertex, W, layer)
+			furthest := getFurthest(query, W, layer)
 
-			neighborVertex, ok := layer[neighbor]
-			if !ok {
-				panic("errro no neighbor found")
-			}
-			if distance(neighborVertex.Vector, vertex.Vector) < distance(vertex.Vector, furthest.Vector) || len(W) < efSize {
+			neighborVertex := layer[neighbor]
+			if distance(neighborVertex.Vector, query.Vector) < distance(query.Vector, furthest.Vector) || len(W) < efSize {
 				candidates.Add(int(neighbor))
 				W.Add(int(neighbor))
 
 				if len(W) > efSize {
-					W.Delete(int(getFurthest(vertex, W, layer).Id))
+					W.Delete(int(getFurthest(query, W, layer).Id))
 				}
 			}
 		}
 	}
 	return W
+
+}
+
+func initSearchLayerSets(entrancePoint g.ID) (s.Set, s.Set, s.Set) {
+	visited := s.Set{}
+	visited.Add(int(entrancePoint))
+	candidates := s.Set{}
+	candidates.Add(int(entrancePoint))
+	W := s.Set{}
+	W.Add(int(entrancePoint))
+
+	return visited, candidates, W
 
 }
 

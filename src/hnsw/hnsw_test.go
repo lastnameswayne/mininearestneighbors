@@ -45,73 +45,70 @@ func TestInsertPoint(t *testing.T) {
 			}
 		}
 		assert.True(t, found)
+	})
+
+	t.Run("vect", func(t *testing.T) {
 
 	})
 }
+
+func TestSearchLayer(t *testing.T) {
+
+	hnsw := constructTestHNSW()
+
+	q := g.Vertex{
+		Id:     10,
+		Vector: []int{1, 2, 3, 4, 5},
+	}
+	t.Run("should output an amount the ef=2 closest neighbors", func(t *testing.T) {
+		layer0 := hnsw.layers[0]
+
+		nearestInLayer := searchLayer(q, layer0, hnsw.entrancePoint, 2)
+
+		asList := nearestInLayer.UnsortedList()
+
+		assert.Contains(t, asList, 2)
+		assert.Contains(t, asList, 4)
+	})
+
+}
+
+func constructTestHNSW() HNSW {
+	// Graph construction is first step
+	v1 := Vector{
+		Id:     1,
+		Vector: []int{100, 1002, 313, 314, 580},
+	}
+	v2 := Vector{
+		Id:     2,
+		Vector: []int{2, 2, 3, 5, 5},
+	}
+	v3 := Vector{
+		Id:     3,
+		Vector: []int{10000, 10000, 10000, 10000, 10000},
+	}
+	v4 := Vector{
+		Id:     4,
+		Vector: []int{1, 2, 3, 4, 5}}
+	layerCount := 3
+	M := 2
+	mMax := 2 * M
+	efSize := 5
+
+	hnsw := ConstructHNSW(layerCount)
+
+	vs := []Vector{v1, v2, v3, v4}
+
+	for _, vector := range vs {
+		hnsw = hnsw.InsertVector(vector, efSize, M, mMax)
+	}
+
+	return hnsw
+}
+
 func main() {
 	// fmt.Println("hello world")
 	// //parameters
-	// layerCount := 10
-	// M := 5
-	// mMax := 2 * M //recommended
-	// efSize := 5
-
-	// // Graph construction is first step
-	// v1 := Vector{
-	// 	Id:     1,
-	// 	Vector: []int{1, 2, 3, 4, 5},
-	// }
-	// v2 := Vector{
-	// 	Id:     2,
-	// 	Vector: []int{2, 2, 3, 5, 5},
-	// }
-	// v3 := Vector{
-	// 	Id:     3,
-	// 	Vector: []int{11, 12, 13, 14, 15},
-	// }
-	// v4 := Vector{
-	// 	Id:     4,
-	// 	Vector: []int{10000, 10000, 10000, 10000, 10000},
-	// }
-	// v5 := Vector{
-	// 	Id:     5,
-	// 	Vector: []int{1, 1002, 3, 4, 5},
-	// }
-	// v6 := Vector{
-	// 	Id:     6,
-	// 	Vector: []int{1, 2, 30, 4, 5},
-	// }
-	// v7 := Vector{
-	// 	Id:     7,
-	// 	Vector: []int{2, 2, 3, 4, 5},
-	// }
-	// v8 := Vector{
-	// 	Id:     8,
-	// 	Vector: []int{10, 200, 3, 4, 5},
-	// }
-	// v10 := Vector{
-	// 	Id:     10,
-	// 	Vector: []int{10, 2, 3, 4, 5},
-	// }
-	// v11 := Vector{
-	// 	Id:     11,
-	// 	Vector: []int{0, 2, 300000, 4, 5},
-	// }
-
-	// hnsw := ConstructHNSW(layerCount)
-
-	// vs := []Vector{v1, v2, v3, v4, v5, v6, v7, v8, v10, v11}
-
-	// for _, vector := range vs {
-	// 	hnsw = InsertVector(hnsw, vector, efSize, M, mMax)
-	// }
-
-	// for idx, layers := range hnsw.layers {
-	// 	fmt.Println("layer", idx, "we have", layers)
-	// }
-	// q := Vector{
-	// 	Id:     9,
-	// 	Vector: []int{0, 2, 3, 4, 5},
 	// }
 	// res := hnsw.Search(q, efSize, 3)
 
