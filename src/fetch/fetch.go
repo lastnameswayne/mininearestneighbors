@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	h "github.com/lastnameswayne/mininearestneighbors/src/hnsw"
 	"go.mongodb.org/mongo-driver/bson"
@@ -66,14 +67,13 @@ func Read() {
 		resultMapped := mapToVector(result)
 		for _, vector := range resultMapped {
 			hnsw = hnsw.InsertVector(vector, efSize, M, mMax)
-			fmt.Println("inserted", vector.Id, vector.Size)
+			// fmt.Println("inserted", vector.Id, vector.Size)
 		}
 	}
 	if err := cursor.Err(); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Done")
-	fmt.Println(hnsw)
 	// ints := []int{63, 71, 51, 50}
 	// q := h.Vector{
 	// 	Id:     123,
@@ -100,7 +100,7 @@ func mapMeasurement(measurements []Measurement, ssenseID int) []h.Vector {
 	sizeToInts := fillMap(measurements)
 	for size, vals := range sizeToInts {
 		vector := h.Vector{
-			Id:     ssenseID,
+			Id:     addsizetoId(ssenseID, size),
 			Size:   size,
 			Vector: vals,
 		}
@@ -108,6 +108,42 @@ func mapMeasurement(measurements []Measurement, ssenseID int) []h.Vector {
 	}
 
 	return res
+}
+
+func addsizetoId(id int, size string) int {
+	asstring := strconv.Itoa(id)
+	sizecode := sizecode(size)
+	sizecodestring := strconv.Itoa(sizecode)
+	val, err := strconv.ParseInt(asstring+sizecodestring, 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	return int(val)
+
+}
+
+func sizecode(size string) int {
+	switch strings.ToUpper(size) {
+	case "XXXL", "56":
+		return 7
+	case "XXL", "54":
+		return 6
+	case "XL", "52":
+		return 5
+	case "L", "50":
+		return 4
+	case "M", "48":
+		return 3
+	case "S", "46":
+		return 2
+	case "XS", "44":
+		return 1
+	case "XXS", "42":
+		return 0
+
+	default:
+		return 10
+	}
 }
 
 func fillMap(measurements []Measurement) map[string][]int {

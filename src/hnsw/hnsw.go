@@ -1,6 +1,7 @@
 package hnsw
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"sort"
@@ -90,9 +91,10 @@ func (hnsw hnsw) InsertVector(queryVector Vector, efSize int, M int, mMax int) h
 		}
 		enterPointHNSW = getClosest(queryVertex, W, layer)
 	}
-	if level > top {
+	if level == top {
 		hnsw.entrancePoint = enterPointHNSW
 	}
+	fmt.Println(enterPointHNSW)
 	return hnsw
 }
 
