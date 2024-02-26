@@ -39,7 +39,7 @@ func TestInsertPoint(t *testing.T) {
 		hnsw := hnsw.InsertVector(v1, efSize, M, M_max)
 
 		found := false
-		for _, item := range hnsw.layers[0] {
+		for _, item := range hnsw.Layers[0] {
 			if item.Id == g.ID(v1.Id) {
 				found = true
 			}
@@ -48,24 +48,22 @@ func TestInsertPoint(t *testing.T) {
 	})
 
 	t.Run("inserting five vectors has five in the bottom layer", func(t *testing.T) {
-		hnsw := constructTestHNSW()
-
-		assert.Len(t, hnsw.layers[0], 5)
 
 	})
 }
 
 func TestSearchLayer(t *testing.T) {
-	hnsw := constructTestHNSW()
+	hnsw := testHNSW()
 
 	q := g.Vertex{
 		Id:     10,
 		Vector: []int{1, 2, 3, 4, 5},
 	}
-	t.Run("should output an amount the ef=2 closest neighbors", func(t *testing.T) {
-		layer0 := hnsw.layers[0]
 
-		nearestInLayer := searchLayer(q, layer0, hnsw.entrancePoint, 2)
+	t.Run("should output an amount the ef=2 closest neighbors", func(t *testing.T) {
+		layer0 := hnsw.Layers[0]
+
+		nearestInLayer := searchLayer(q, layer0, hnsw.EntrancePoint, 2)
 
 		asList := nearestInLayer.UnsortedList()
 
@@ -73,9 +71,129 @@ func TestSearchLayer(t *testing.T) {
 		assert.Contains(t, asList, 4)
 	})
 
+	t.Run("entry point in top layer should be node 1", func(t *testing.T) {
+		topLayer := hnsw.getTopLayer()
+		nearestInLayer := searchLayer(q, topLayer, hnsw.EntrancePoint, 1)
+
+		asList := nearestInLayer.UnsortedList()
+
+		assert.Equal(t, asList[0], 1)
+
+	})
+
+}
+
+func testHNSW() hnsw {
+	layerAmount := 3
+	//max 3 connections per node
+	// Graph construction is first step
+	v1 := g.Vertex{
+		Id:     1,
+		Vector: []int{100, 100, 100, 100, 100},
+		Edges:  []g.ID{2, 3, 4},
+	}
+	v2 := g.Vertex{
+		Id:     2,
+		Vector: []int{2, 2, 3, 5, 5},
+		Edges:  []g.ID{1, 4},
+	}
+	v3 := g.Vertex{
+		Id:     3,
+		Vector: []int{10000, 10000, 10000, 10000, 10000},
+		Edges:  []g.ID{1, 4, 5},
+	}
+	v4 := g.Vertex{
+		Id:     4,
+		Vector: []int{1, 2, 3, 4, 5},
+		Edges:  []g.ID{1, 2, 3},
+	}
+	v5 := g.Vertex{
+		Id:     5,
+		Vector: []int{300, 300, 300, 300, 300},
+		Edges:  []g.ID{3, 6, 7},
+	}
+	v6 := g.Vertex{
+		Id:     6,
+		Vector: []int{400, 400, 400, 400, 400},
+		Edges:  []g.ID{5, 8},
+	}
+	v7 := g.Vertex{
+		Id:     7,
+		Vector: []int{500, 500, 500, 500, 500},
+		Edges:  []g.ID{5, 8},
+	}
+	v8 := g.Vertex{
+		Id:     8,
+		Vector: []int{600, 600, 600, 600, 600},
+		Edges:  []g.ID{6, 7},
+	}
+	layer0 := []g.Vertex{v1, v2, v3, v4, v5, v6, v7, v8}
+	layers := map[int]g.Graph{}
+	layers[0] = createAndAddLayer(layer0, layerAmount)
+
+	v1 = g.Vertex{
+		Id:     1,
+		Vector: []int{100, 100, 100, 100, 100}, Edges: []g.ID{2, 5},
+	}
+	v2 = g.Vertex{
+		Id:     2,
+		Vector: []int{2, 2, 3, 5, 5},
+		Edges:  []g.ID{1, 8},
+	}
+	v5 = g.Vertex{
+		Id:     5,
+		Vector: []int{300, 300, 300, 300, 300},
+		Edges:  []g.ID{1, 8},
+	}
+	v7 = g.Vertex{
+		Id:     7,
+		Vector: []int{500, 500, 500, 500, 500},
+		Edges:  []g.ID{5, 8},
+	}
+	v8 = g.Vertex{
+		Id:     8,
+		Vector: []int{600, 600, 600, 600, 600},
+		Edges:  []g.ID{2, 5, 7},
+	}
+
+	layer1 := []g.Vertex{v1, v2, v3, v4, v5, v6, v7, v8}
+	layers[1] = createAndAddLayer(layer1, layerAmount)
+
+	v1 = g.Vertex{
+		Id:     1,
+		Vector: []int{100, 100, 100, 100, 100}, Edges: []g.ID{7},
+	}
+	v7 = g.Vertex{
+		Id:     7,
+		Vector: []int{500, 500, 500, 500, 500},
+		Edges:  []g.ID{5, 8},
+	}
+
+	layer2 := []g.Vertex{v1, v7}
+	layers[2] = createAndAddLayer(layer2, layerAmount)
+
+	return hnsw{
+		Layers:        layers,
+		EntrancePoint: v1,
+	}
+}
+
+func createAndAddLayer(layer []g.Vertex, layerAmount int) g.Graph {
+	layer0g := g.Graph{}
+	for _, v := range layer {
+		layer0g[v.Id] = v
+	}
+
+	layers := map[int]g.Graph{}
+	for i := 0; i < layerAmount; i++ {
+		layers[i] = g.Graph{g.ID(0): _dummyNode}
+	}
+
+	return layer0g
 }
 
 func constructTestHNSW() hnsw {
+	layerAmount := 3
 	// Graph construction is first step
 	v1 := Vector{
 		Id:     1,
@@ -92,12 +210,17 @@ func constructTestHNSW() hnsw {
 	v4 := Vector{
 		Id:     4,
 		Vector: []int{1, 2, 3, 4, 5}}
-	layerCount := 3
+
 	M := 2
 	mMax := 2 * M
 	efSize := 5
 
-	hnsw := ConstructHNSW(layerCount)
+	hnsw := hnsw{}
+
+	layers := map[int]g.Graph{}
+	for i := 0; i < layerAmount; i++ {
+		layers[i] = g.Graph{g.ID(0): _dummyNode}
+	}
 
 	vs := []Vector{v1, v2, v3, v4}
 

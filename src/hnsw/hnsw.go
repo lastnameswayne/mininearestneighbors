@@ -11,27 +11,26 @@ import (
 )
 
 type Vector struct {
-	// A vector is a list of integers
-	// In mesure case we also have an id
 	Id     int
 	Size   string
 	Vector []int
 }
+
 type hnsw struct {
-	layers        map[int]g.Graph
-	entrancePoint g.Vertex
+	Layers        map[int]g.Graph
+	EntrancePoint g.Vertex
 }
+
+var _dummyNode = g.Vertex{Id: 0, Vector: []int{100000000, 10000, 10000, 10000, 10000}}
 
 func ConstructHNSW(layerAmount int) hnsw {
 	layers := map[int]g.Graph{}
 	for i := 0; i < layerAmount; i++ {
-		zeroNode := g.Vertex{Id: 0, Vector: []int{100000000, 10000, 10000, 10000, 10000}, Edges: []g.ID{}}
-		layers[i] = g.Graph{g.ID(0): zeroNode}
+		layers[i] = g.Graph{g.ID(0): _dummyNode}
 	}
-	zeroNode := g.Vertex{Id: 0, Vector: []int{10000, 10000, 10000, 10000, 10000}, Edges: []g.ID{}}
 	return hnsw{
-		layers:        layers,
-		entrancePoint: zeroNode,
+		Layers:        layers,
+		EntrancePoint: _dummyNode,
 	}
 }
 
@@ -41,20 +40,20 @@ func (hnsw *hnsw) Search(q Vector, efSize int, k int) []g.Vertex {
 		Vector: q.Vector,
 		Id:     g.ID(q.Id),
 	}
-	ep := hnsw.entrancePoint
-	top := len(hnsw.layers) - 1
+	ep := hnsw.EntrancePoint
+	top := len(hnsw.Layers) - 1
 	for i := top; i > 0; i-- {
-		layer := hnsw.layers[i]
+		layer := hnsw.Layers[i]
 		W = searchLayer(queryElement, layer, ep, 1)
 		ep = getClosest(queryElement, W, layer)
 	}
-	W = searchLayer(queryElement, hnsw.layers[0], ep, efSize)
-	return getKClosest(W, queryElement, k, hnsw.layers[0])
+	W = searchLayer(queryElement, hnsw.Layers[0], ep, efSize)
+	return getKClosest(W, queryElement, k, hnsw.Layers[0])
 }
 
 func (hnsw hnsw) InsertVector(queryVector Vector, efSize int, M int, mMax int) hnsw {
-	enterPointHNSW := hnsw.entrancePoint
-	top := len(hnsw.layers) - 1
+	enterPointHNSW := hnsw.EntrancePoint
+	top := len(hnsw.Layers) - 1
 	levelMultiplier := 1 / math.Log(float64(M)) // rule of thumb is mL = 1/ln(M) where M is the number neighbors we add to each vertex on insertion
 
 	W := s.Set{}
@@ -64,13 +63,13 @@ func (hnsw hnsw) InsertVector(queryVector Vector, efSize int, M int, mMax int) h
 	queryVertex := g.Vertex{Id: g.ID(queryVector.Id), Vector: queryVector.Vector, Edges: []g.ID{}}
 
 	for i := top; i > level+1; i-- {
-		layer := hnsw.layers[i]
+		layer := hnsw.Layers[i]
 		W = searchLayer(queryVertex, layer, enterPointHNSW, 1)
 		enterPointHNSW = getClosest(queryVertex, W, layer)
 	}
 
 	for i := level; i >= 0; i-- {
-		layer := hnsw.layers[i]
+		layer := hnsw.Layers[i]
 		W = searchLayer(queryVertex, layer, enterPointHNSW, efSize)
 		neighbors := selectNeighbors(queryVertex, W, M, layer)
 
@@ -92,7 +91,7 @@ func (hnsw hnsw) InsertVector(queryVector Vector, efSize int, M int, mMax int) h
 	}
 	if level == top {
 		enterPointHNSW = getClosest(queryVertex, W, hnsw.getTopLayer())
-		hnsw.entrancePoint = enterPointHNSW
+		hnsw.EntrancePoint = enterPointHNSW
 	}
 	fmt.Println(enterPointHNSW)
 	return hnsw
@@ -233,8 +232,8 @@ func getFurthest(vertex g.Vertex, candidates s.Set, level g.Graph) g.Vertex {
 
 }
 func (g hnsw) getTopLayer() g.Graph {
-	top := len(g.layers)
-	return g.layers[top-1]
+	top := len(g.Layers)
+	return g.Layers[top-1]
 }
 
 func verticesToSet(vertices []g.ID) s.Set {
