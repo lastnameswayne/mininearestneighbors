@@ -14,9 +14,18 @@ func buildGraphForTest() {
 func TestSearch(t *testing.T) {
 }
 
-// func TestBuildN() {
+func TestConstructHNSW(t *testing.T) {
+	t.Run("construct hnsw with 5 layers with a zero node in each layer", func(t *testing.T) {
 
-// }
+		hnsw := ConstructHNSW(5)
+		assert.Len(t, hnsw.Layers, 5)
+
+		for _, layer := range hnsw.Layers {
+			assert.Equal(t, layer[0].Id, g.ID(0))
+		}
+	})
+
+}
 
 func TestInsertPoint(t *testing.T) {
 	layerCount := 3
