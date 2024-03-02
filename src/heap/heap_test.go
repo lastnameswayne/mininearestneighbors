@@ -11,16 +11,18 @@ func TestHeapify(t *testing.T) {
 
 	var heap Heap = elems
 
-	heap.heapify()
+	heap = heapify(elems)
 	t.Log(heap)
 	assert.Equal(t, -1, heap[0])
 
-	elems = []int{12, 11, 13, 5, 6, 7}
-	heap = elems
-	heap.heapify()
+	min := heap.delete(-1)
+	t.Log(heap)
 
-	expected := []int{5, 6, 7, 11, 12, 13}
-	var expectedHeap Heap = expected
-	assert.Equal(t, expectedHeap, heap)
+	assert.Equal(t, -1, min)
+
+	elems = []int{9, 31, 40, 22, 10, 15, 1, 25, 91}
+	heap = heapify(elems)
+
+	assert.Equal(t, 1, heap[0])
 
 }

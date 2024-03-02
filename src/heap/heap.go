@@ -2,7 +2,6 @@ package heap
 
 import (
 	"fmt"
-	"math"
 )
 
 type Heap []int
@@ -17,11 +16,46 @@ func New() Heap {
 	return Heap{}
 }
 
-func (h *Heap) heapify() {
+func heapify(arr []int) Heap {
+	h := New()
+	for _, elem := range arr {
+		h.insert(elem)
+	}
+	return h
+}
+
+func (h *Heap) down() {
+	idx := 0
+	length := len(*h)
+	for {
+		leftChildIdx := 2*idx + 1
+		rightChildIdx := 2*idx + 2
+
+		smallestChildIdx := idx
+		if leftChildIdx < length && (*h)[leftChildIdx] < (*h)[smallestChildIdx] {
+			smallestChildIdx = leftChildIdx
+		}
+		if rightChildIdx < length && (*h)[rightChildIdx] < (*h)[smallestChildIdx] {
+			smallestChildIdx = rightChildIdx
+		}
+
+		if smallestChildIdx == idx {
+			break
+		}
+
+		h.swap(idx, smallestChildIdx)
+
+		idx = smallestChildIdx
+	}
+}
+
+func (h *Heap) up() {
+	i := len(*h) - 1
+
 	elem := (*h)[i]
-	parent := math.Floor(float64((i - 1) / 2))
+	parent := (i - 1) / 2
 	if parent < 0 {
-		continue
+		return
 	}
 
 	newIndex := i
@@ -32,7 +66,7 @@ func (h *Heap) heapify() {
 		h.swap(newIndex, int(parent))
 		newIndex = int(parent)
 
-		parent = math.Floor(float64((newIndex - 1) / 2))
+		parent = (newIndex - 1) / 2
 		if parent < 0 {
 			break
 		}
@@ -40,15 +74,33 @@ func (h *Heap) heapify() {
 	}
 }
 
-func (h Heap) insert(element int) Heap {
-
-	h = append(h, element)
-	return h
+func (h *Heap) insert(element int) Heap {
+	*h = append(*h, element)
+	h.up()
+	return *h
 }
 
-func (h Heap) delete(element int) {
+func (h *Heap) delete(element int) int {
+	min := (*h)[0]
+
+	//push root to back and cut it off
+	lastElementIndex := len(*h) - 1
+	val := (*h)[lastElementIndex]
+	(*h)[0] = val
+	*h = (*h)[:lastElementIndex]
+
+	h.down()
+
+	return min
 }
 
 func (h *Heap) swap(idx1, idx2 int) {
 	(*h)[idx1], (*h)[idx2] = (*h)[idx2], (*h)[idx1]
+}
+
+func (h *Heap) peek() int {
+	if len(*h) < 1 {
+		return 0
+	}
+	return (*h)[0]
 }
