@@ -27,6 +27,18 @@ func TestConstructHNSW(t *testing.T) {
 
 }
 
+func TestGetClosest(t *testing.T) {
+
+}
+
+func TestGetFurthest(t *testing.T) {
+
+}
+
+func TestSetNewNeighborhood(t *testing.T) {
+
+}
+
 func TestInsertPoint(t *testing.T) {
 	layerCount := 3
 	efSize := 3
