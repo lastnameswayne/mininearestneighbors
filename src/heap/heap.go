@@ -26,26 +26,26 @@ func heapify(arr []int) Heap {
 
 func (h *Heap) down() {
 	idx := 0
-	length := len(*h)
+	size := len(*h)
 	for {
-		leftChildIdx := 2*idx + 1
-		rightChildIdx := 2*idx + 2
+		left := 2*idx + 1
+		right := 2*idx + 2
 
-		smallestChildIdx := idx
-		if leftChildIdx < length && (*h)[leftChildIdx] < (*h)[smallestChildIdx] {
-			smallestChildIdx = leftChildIdx
+		smallest := idx
+		if left < size && (*h)[left] < (*h)[smallest] {
+			smallest = left
 		}
-		if rightChildIdx < length && (*h)[rightChildIdx] < (*h)[smallestChildIdx] {
-			smallestChildIdx = rightChildIdx
+		if right < size && (*h)[right] < (*h)[smallest] {
+			smallest = right
 		}
 
-		if smallestChildIdx == idx {
+		if smallest == idx {
 			break
 		}
 
-		h.swap(idx, smallestChildIdx)
+		h.swap(idx, smallest)
 
-		idx = smallestChildIdx
+		idx = smallest
 	}
 }
 

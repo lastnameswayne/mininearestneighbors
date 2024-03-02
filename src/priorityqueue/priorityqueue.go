@@ -15,15 +15,6 @@ type queue interface {
 	Push()
 }
 
-type binaryTree struct {
-	nodes []node
-}
-
-type node struct {
-	left  *node
-	right *node
-}
-
 func New(size int) *PriorityQueue {
 	priorityQueue := PriorityQueue{
 		queue: []Element{},
