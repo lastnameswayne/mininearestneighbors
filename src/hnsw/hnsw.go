@@ -181,45 +181,6 @@ func calculateLevel(levelMultiplier float64) int {
 	return int(level)
 }
 
-func getClosest(vertex g.Vertex, candidates s.Set, level g.Graph) g.Vertex {
-	closestDist := math.Inf(1)
-	randomId := candidates.GetRandom()
-	closest := level[g.ID(randomId)]
-	for id, _ := range candidates {
-		candidate, ok := level[g.ID(id)]
-		if !ok {
-			return g.Vertex{}
-		}
-
-		distance := v.Distance(vertex.Vector, candidate.Vector)
-		if distance <= closestDist || distance == math.Inf(1) {
-			closest = candidate
-			closestDist = distance
-		}
-	}
-	return closest
-}
-
-func getFurthest(vertex g.Vertex, candidates s.Set, level g.Graph) g.Vertex {
-	furthestDist := math.Inf(-1)
-	randomId := candidates.GetRandom()
-	furthest := level[g.ID(randomId)]
-	for id, _ := range candidates {
-		candidate, ok := level[g.ID(id)]
-		if !ok {
-			return g.Vertex{}
-		}
-
-		distance := v.Distance(vertex.Vector, candidate.Vector)
-		if distance > furthestDist || distance == math.Inf(1) {
-			furthest = candidate
-			furthestDist = distance
-		}
-	}
-
-	return furthest
-
-}
 func (g hnsw) getTopLayer() g.Graph {
 	top := len(g.Layers)
 	return g.Layers[top-1]
