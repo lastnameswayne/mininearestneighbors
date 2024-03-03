@@ -46,3 +46,7 @@ func (p *PriorityQueue) Peek() *heap.Element {
 func (p *PriorityQueue) Size() int {
 	return len(p.queue)
 }
+
+func (p *PriorityQueue) Elements() []heap.Element {
+	return p.queue.Elements()
+}

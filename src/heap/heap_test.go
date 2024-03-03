@@ -11,22 +11,40 @@ func TestHeapify(t *testing.T) {
 		{Weight: 1, Element: 1}, {Weight: 5, Element: 2}, {Weight: 3, Element: 3}, {Weight: 6, Element: 4}, {Weight: 7, Element: 5}, {Weight: -1, Element: 6},
 	}
 
-	var heap Heap = elems
+	var heap = Heap{
+		heap:     elems,
+		heapType: Min,
+	}
 
 	heap = Heapify(elems)
 	t.Log(heap)
-	assert.Equal(t, -1, heap[0].Weight)
+	assert.Equal(t, -1, heap.heap[0].Weight)
 
 	min := heap.Delete()
 	t.Log(heap)
 
 	assert.Equal(t, -1, min.Weight)
-	assert.Equal(t, 5, len(heap))
+	assert.Equal(t, 5, len(heap.heap))
 
 	elems = []Element{{Weight: 9, Element: 1}, {Weight: 31, Element: 2}, {Weight: 40, Element: 3}, {Weight: 22, Element: 4}, {Weight: 10, Element: 5}, {Weight: 15, Element: 6}, {Weight: 1, Element: 7}, {Weight: 25, Element: 8}, {Weight: 91, Element: 9}}
 
 	heap = Heapify(elems)
 
-	assert.Equal(t, 1, heap[0].Weight)
+	assert.Equal(t, 1, heap.heap[0].Weight)
 
+}
+
+func TestMaxHeap(t *testing.T) {
+	elems := []Element{
+		{Weight: 1, Element: 1}, {Weight: 5, Element: 2}, {Weight: 3, Element: 3}, {Weight: 6, Element: 4}, {Weight: 7, Element: 5}, {Weight: -1, Element: 6},
+	}
+
+	var heap = Heap{
+		heap:     elems,
+		heapType: Max,
+	}
+
+	heap = Heapify(elems)
+	t.Log(heap)
+	assert.Equal(t, 7, heap.heap[0].Weight)
 }

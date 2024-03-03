@@ -4,14 +4,25 @@ import (
 	"fmt"
 )
 
-// this is a minheap
+// this is a heap
+// type is either min or max
 
-type Heap []Element
+type Heap struct {
+	heap     []Element
+	heapType Type
+}
 
 type Element struct {
 	Weight  float64
 	Element int
 }
+
+type Type int64
+
+const (
+	Min Type = 0
+	Max Type = 1
+)
 
 func New() Heap {
 	return Heap{}
@@ -27,16 +38,16 @@ func Heapify(arr []Element) Heap {
 
 func (h *Heap) down() {
 	idx := 0
-	size := len(*h)
+	size := len(h.heap)
 	for {
 		left := 2*idx + 1
 		right := 2*idx + 2
 
 		smallest := idx
-		if left < size && (*h)[left].Weight < (*h)[smallest].Weight {
+		if left < size && h.heap[left].Weight < h.heap[smallest].Weight {
 			smallest = left
 		}
-		if right < size && (*h)[right].Weight < (*h)[smallest].Weight {
+		if right < size && h.heap[right].Weight < h.heap[smallest].Weight {
 			smallest = right
 		}
 
@@ -51,16 +62,16 @@ func (h *Heap) down() {
 }
 
 func (h *Heap) up() {
-	i := len(*h) - 1
+	i := len(h.heap) - 1
 
-	elem := (*h)[i]
+	elem := h.heap[i]
 	parent := (i - 1) / 2
 	if parent < 0 {
 		return
 	}
 
 	newIndex := i
-	parentVal := (*h)[int(parent)]
+	parentVal := h.heap[int(parent)]
 	for elem.Weight < parentVal.Weight {
 		fmt.Println(elem, parentVal)
 
@@ -71,37 +82,43 @@ func (h *Heap) up() {
 		if parent < 0 {
 			break
 		}
-		parentVal = (*h)[int(parent)]
+		parentVal = h.heap[int(parent)]
 	}
 }
 
 func (h *Heap) Insert(element Element) Heap {
-	*h = append(*h, element)
+	h.heap = append(h.heap, element)
 	h.up()
 	return *h
 }
 
 func (h *Heap) Delete() Element {
-	min := (*h)[0]
+	min := h.heap[0]
 
 	//push root to back and cut it off
-	lastElementIndex := len(*h) - 1
-	val := (*h)[lastElementIndex]
-	(*h)[0] = val
-	*h = (*h)[:lastElementIndex]
+	lastElementIndex := len(h.heap) - 1
+	val := h.heap[lastElementIndex]
+	h.heap[0] = val
+	h.heap = h.heap[:lastElementIndex]
 
 	h.down()
 
 	return min
 }
 
+func (h *Heap) Elements() []Element {
+	res := make([]Element, len(h.heap))
+	res = append(res, h.heap...)
+	return res
+}
+
 func (h *Heap) swap(idx1, idx2 int) {
-	(*h)[idx1], (*h)[idx2] = (*h)[idx2], (*h)[idx1]
+	h.heap[idx1], h.heap[idx2] = h.heap[idx2], h.heap[idx1]
 }
 
 func (h *Heap) Peek() *Element {
-	if len(*h) < 1 {
+	if len(h.heap) < 1 {
 		return nil
 	}
-	return &(*h)[0]
+	return &h.heap[0]
 }
