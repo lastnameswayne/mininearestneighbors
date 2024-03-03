@@ -20,12 +20,14 @@ const (
 	Max Type = 1
 )
 
-func New() Heap {
-	return Heap{}
+func New(heapType Type) *Heap {
+	return &Heap{
+		heapType: heapType,
+	}
 }
 
-func Heapify(arr []Element) Heap {
-	h := New()
+// fills heap with arr
+func (h *Heap) Heapify(arr []Element) *Heap {
 	for _, elem := range arr {
 		h.Insert(elem)
 	}
@@ -57,10 +59,14 @@ func (h *Heap) down() {
 }
 
 func (h *Heap) compare(index, optimum int) bool {
-	if h.heapType == Min {
+	switch h.heapType {
+	case Min:
 		return index < len(h.heap) && h.heap[index].Weight < h.heap[optimum].Weight
+	case Max:
+		return index < len(h.heap) && h.heap[index].Weight > h.heap[optimum].Weight
+	default:
+		panic("unknown heap type ")
 	}
-	return false
 }
 
 func (h *Heap) up() {
