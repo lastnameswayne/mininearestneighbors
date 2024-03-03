@@ -4,27 +4,27 @@ import (
 	"fmt"
 )
 
-type Heap []int
+type heap []int
 
-type heap interface {
-	heapify()
-	insert()
-	delete()
+type Heap interface {
+	Insert()
+	Delete()
+	Peek()
 }
 
-func New() Heap {
-	return Heap{}
+func New() heap {
+	return heap{}
 }
 
-func heapify(arr []int) Heap {
+func Heapify(arr []int) heap {
 	h := New()
 	for _, elem := range arr {
-		h.insert(elem)
+		h.Insert(elem)
 	}
 	return h
 }
 
-func (h *Heap) down() {
+func (h *heap) down() {
 	idx := 0
 	size := len(*h)
 	for {
@@ -49,7 +49,7 @@ func (h *Heap) down() {
 	}
 }
 
-func (h *Heap) up() {
+func (h *heap) up() {
 	i := len(*h) - 1
 
 	elem := (*h)[i]
@@ -74,13 +74,13 @@ func (h *Heap) up() {
 	}
 }
 
-func (h *Heap) insert(element int) Heap {
+func (h *heap) Insert(element int) heap {
 	*h = append(*h, element)
 	h.up()
 	return *h
 }
 
-func (h *Heap) delete(element int) int {
+func (h *heap) Delete(element int) int {
 	min := (*h)[0]
 
 	//push root to back and cut it off
@@ -94,11 +94,11 @@ func (h *Heap) delete(element int) int {
 	return min
 }
 
-func (h *Heap) swap(idx1, idx2 int) {
+func (h *heap) swap(idx1, idx2 int) {
 	(*h)[idx1], (*h)[idx2] = (*h)[idx2], (*h)[idx1]
 }
 
-func (h *Heap) peek() int {
+func (h *heap) Peek() int {
 	if len(*h) < 1 {
 		return 0
 	}

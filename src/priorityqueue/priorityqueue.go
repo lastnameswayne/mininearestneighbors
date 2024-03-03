@@ -1,32 +1,37 @@
 package priorityqueue
 
+import "github.com/lastnameswayne/mininearestneighbors/src/heap"
+
 type Element struct {
 	weight  int
 	element int
 }
 
-type PriorityQueue struct {
+type priorityQueue struct {
 	queue []Element
-	size  int
 }
 
-type queue interface {
+type PriorityQueue interface {
 	Pop()
 	Push()
 }
 
 func New(size int) *PriorityQueue {
-	priorityQueue := PriorityQueue{
-		queue: []Element{},
-		size:  size,
+	priorityQueue := priorityQueue{
+		queue: heap.New(),
 	}
 	return &priorityQueue
 }
 
 func (p *PriorityQueue) Pop() (int, int) {
+	h := heap.New()
 
 }
 
 func (p *PriorityQueue) Push(element int, weight int) {
+
+}
+
+func (p *PriorityQueue) Peak() {
 
 }

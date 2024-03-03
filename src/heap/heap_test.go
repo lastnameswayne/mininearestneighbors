@@ -9,19 +9,20 @@ import (
 func TestHeapify(t *testing.T) {
 	elems := []int{1, 5, 3, 6, 7, -1}
 
-	var heap Heap = elems
+	var heap heap = elems
 
-	heap = heapify(elems)
+	heap = Heapify(elems)
 	t.Log(heap)
 	assert.Equal(t, -1, heap[0])
 
-	min := heap.delete(-1)
+	min := heap.Delete(-1)
 	t.Log(heap)
 
 	assert.Equal(t, -1, min)
+	assert.Equal(t, 5, len(heap))
 
 	elems = []int{9, 31, 40, 22, 10, 15, 1, 25, 91}
-	heap = heapify(elems)
+	heap = Heapify(elems)
 
 	assert.Equal(t, 1, heap[0])
 
