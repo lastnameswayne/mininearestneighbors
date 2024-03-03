@@ -32,8 +32,8 @@ func (g *Graph) AddEdge(src Vertex, dest Vertex) {
 	(*g)[dest.Id] = destVal
 }
 
-func (g *Graph) Neighborhood(v Vertex) []ID {
-	val, ok := (*g)[v.Id]
+func (g *Graph) Neighborhood(v ID) []ID {
+	val, ok := (*g)[v]
 	if !ok {
 		return []ID{}
 	}

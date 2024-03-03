@@ -1,5 +1,9 @@
 package heap
 
+import (
+	g "github.com/lastnameswayne/mininearestneighbors/src/graph"
+)
+
 // this is a heap
 // type is either min or max
 
@@ -9,8 +13,8 @@ type Heap struct {
 }
 
 type Element struct {
-	Weight  float64
-	Element int
+	Weight float64
+	Vertex g.Vertex
 }
 
 type Type int64
@@ -123,4 +127,8 @@ func (h *Heap) Peek() *Element {
 		return nil
 	}
 	return &h.heap[0]
+}
+
+func (h *Heap) Size() int {
+	return len(h.heap)
 }

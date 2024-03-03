@@ -14,25 +14,24 @@ type PriorityQueue struct {
 	query g.Vertex
 }
 
-func New(query g.Vertex) *PriorityQueue {
+func New(query g.Vertex, sort heap.Type) *PriorityQueue {
 	PriorityQueue := PriorityQueue{
-		queue: heap.New(),
+		queue: *heap.New(sort),
 		query: query,
 	}
 	return &PriorityQueue
 }
 
 func (p *PriorityQueue) Pop() heap.Element {
-	h := heap.New()
-	return h.Delete()
+	return p.queue.Delete()
 }
 
-func (p *PriorityQueue) Push(vector g.Vertex) {
-	weight := v.Distance(vector.Vector, p.query.Vector)
+func (p *PriorityQueue) Push(vertex g.Vertex) {
+	weight := v.Distance(vertex.Vector, p.query.Vector)
 
 	elem := heap.Element{
-		Weight:  weight,
-		Element: int(vector.Id),
+		Weight: weight,
+		Vertex: vertex,
 	}
 
 	p.queue.Insert(elem)
@@ -44,7 +43,7 @@ func (p *PriorityQueue) Peek() *heap.Element {
 }
 
 func (p *PriorityQueue) Size() int {
-	return len(p.queue)
+	return p.queue.Size()
 }
 
 func (p *PriorityQueue) Elements() []heap.Element {
