@@ -1,9 +1,5 @@
 package heap
 
-import (
-	"fmt"
-)
-
 // this is a heap
 // type is either min or max
 
@@ -38,16 +34,15 @@ func Heapify(arr []Element) Heap {
 
 func (h *Heap) down() {
 	idx := 0
-	size := len(h.heap)
 	for {
 		left := 2*idx + 1
 		right := 2*idx + 2
 
 		smallest := idx
-		if left < size && h.heap[left].Weight < h.heap[smallest].Weight {
+		if h.compare(left, smallest) {
 			smallest = left
 		}
-		if right < size && h.heap[right].Weight < h.heap[smallest].Weight {
+		if h.compare(right, smallest) {
 			smallest = right
 		}
 
@@ -61,28 +56,29 @@ func (h *Heap) down() {
 	}
 }
 
-func (h *Heap) up() {
-	i := len(h.heap) - 1
+func (h *Heap) compare(index, optimum int) bool {
+	if h.heapType == Min {
+		return index < len(h.heap) && h.heap[index].Weight < h.heap[optimum].Weight
+	}
+	return false
+}
 
-	elem := h.heap[i]
-	parent := (i - 1) / 2
+func (h *Heap) up() {
+	index := len(h.heap) - 1
+
+	parent := (index - 1) / 2
 	if parent < 0 {
 		return
 	}
 
-	newIndex := i
-	parentVal := h.heap[int(parent)]
-	for elem.Weight < parentVal.Weight {
-		fmt.Println(elem, parentVal)
+	for h.compare(index, parent) {
+		h.swap(index, int(parent))
+		index = int(parent)
 
-		h.swap(newIndex, int(parent))
-		newIndex = int(parent)
-
-		parent = (newIndex - 1) / 2
+		parent = (index - 1) / 2
 		if parent < 0 {
 			break
 		}
-		parentVal = h.heap[int(parent)]
 	}
 }
 
