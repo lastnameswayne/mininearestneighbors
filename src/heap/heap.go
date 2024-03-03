@@ -4,19 +4,13 @@ import (
 	"fmt"
 )
 
-//this is a minheap
+// this is a minheap
 
 type Heap []Element
 
 type Element struct {
-	weight  int
-	element int
-}
-
-type heap interface {
-	Insert()
-	Delete()
-	Peek()
+	Weight  float64
+	Element int
 }
 
 func New() Heap {
@@ -39,10 +33,10 @@ func (h *Heap) down() {
 		right := 2*idx + 2
 
 		smallest := idx
-		if left < size && (*h)[left].weight < (*h)[smallest].weight {
+		if left < size && (*h)[left].Weight < (*h)[smallest].Weight {
 			smallest = left
 		}
-		if right < size && (*h)[right].weight < (*h)[smallest].weight {
+		if right < size && (*h)[right].Weight < (*h)[smallest].Weight {
 			smallest = right
 		}
 
@@ -67,7 +61,7 @@ func (h *Heap) up() {
 
 	newIndex := i
 	parentVal := (*h)[int(parent)]
-	for elem.weight < parentVal.weight {
+	for elem.Weight < parentVal.Weight {
 		fmt.Println(elem, parentVal)
 
 		h.swap(newIndex, int(parent))

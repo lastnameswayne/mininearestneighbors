@@ -1,33 +1,48 @@
 package priorityqueue
 
-import "github.com/lastnameswayne/mininearestneighbors/src/heap"
+import (
+	g "github.com/lastnameswayne/mininearestneighbors/src/graph"
+	heap "github.com/lastnameswayne/mininearestneighbors/src/heap"
+	v "github.com/lastnameswayne/mininearestneighbors/src/vector"
+)
 
-type priorityQueue struct {
+// the weight is automatically determined
+// by comparing to the query
+// you define the query on initialization
+type PriorityQueue struct {
 	queue heap.Heap
+	query g.Vertex
 }
 
-type PriorityQueue interface {
-	Pop()
-	Push()
-}
-
-func New() *priorityQueue {
-	priorityQueue := priorityQueue{
+func New(query g.Vertex) *PriorityQueue {
+	PriorityQueue := PriorityQueue{
 		queue: heap.New(),
+		query: query,
 	}
-	return &priorityQueue
+	return &PriorityQueue
 }
 
-func (p *priorityQueue) Pop() (int, int) {
+func (p *PriorityQueue) Pop() heap.Element {
 	h := heap.New()
-	h.Delete()
+	return h.Delete()
+}
+
+func (p *PriorityQueue) Push(vector g.Vertex) {
+	weight := v.Distance(vector.Vector, p.query.Vector)
+
+	elem := heap.Element{
+		Weight:  weight,
+		Element: int(vector.Id),
+	}
+
+	p.queue.Insert(elem)
+}
+
+func (p *PriorityQueue) Peek() *heap.Element {
+	return p.queue.Peek()
 
 }
 
-func (p *priorityQueue) Push(element int, weight int) {
-
-}
-
-func (p *priorityQueue) Peak() {
-
+func (p *PriorityQueue) Size() int {
+	return len(p.queue)
 }

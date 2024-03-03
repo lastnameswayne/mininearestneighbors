@@ -6,14 +6,10 @@ import (
 	"sort"
 
 	g "github.com/lastnameswayne/mininearestneighbors/src/graph"
+	q "github.com/lastnameswayne/mininearestneighbors/src/priorityqueue"
 	s "github.com/lastnameswayne/mininearestneighbors/src/set"
+	v "github.com/lastnameswayne/mininearestneighbors/src/vector"
 )
-
-type Vector struct {
-	Id     int
-	Size   string
-	Vector []int
-}
 
 type hnsw struct {
 	Layers        map[int]g.Graph
@@ -33,7 +29,7 @@ func ConstructHNSW(layerAmount int) hnsw {
 	}
 }
 
-func (hnsw *hnsw) Search(q Vector, efSize int, k int) []g.Vertex {
+func (hnsw *hnsw) Search(q v.Vector, efSize int, k int) []g.Vertex {
 	W := s.Set{}
 	queryElement := g.Vertex{
 		Vector: q.Vector,
@@ -50,7 +46,7 @@ func (hnsw *hnsw) Search(q Vector, efSize int, k int) []g.Vertex {
 	return getKClosest(W, queryElement, k, hnsw.Layers[0])
 }
 
-func (hnsw hnsw) InsertVector(queryVector Vector, efSize int, M int, mMax int) hnsw {
+func (hnsw hnsw) InsertVector(queryVector v.Vector, efSize int, M int, mMax int) hnsw {
 	enterPointHNSW := hnsw.EntrancePoint
 	top := len(hnsw.Layers) - 1
 	levelMultiplier := 1 / math.Log(float64(M)) // rule of thumb is mL = 1/ln(M) where M is the number neighbors we add to each vertex on insertion
@@ -97,15 +93,15 @@ func (hnsw hnsw) InsertVector(queryVector Vector, efSize int, M int, mMax int) h
 
 // does a greedy search over a layer, and each layer is a graph by itself
 func searchLayer(query g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize int) s.Set {
-	visited, candidates, W := initSearchLayerSets(entrancePoint.Id)
+	visited := s.Set{} //vertices we have visited
+	visited.Add(int(entrancePoint.Id))
+	candidates, W := initSearchLayerHeaps(entrancePoint, query)
 
-	for len(candidates) > 0 {
-		nearest := getClosest(query, candidates, layer)
+	for candidates.Size() > 0 {
+		nearest := candidates.Pop()
 		furthest := getFurthest(query, W, layer)
 
-		candidates.Delete(int(nearest.Id))
-
-		if distance(nearest.Vector, query.Vector) > distance(furthest.Vector, query.Vector) {
+		if v.Distance(nearest.Vector, query.Vector) > v.Distance(furthest.Vector, query.Vector) {
 			break //all elements in a layer have been evaluated
 		}
 
@@ -120,7 +116,7 @@ func searchLayer(query g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize i
 			furthest := getFurthest(query, W, layer)
 
 			neighborVertex := layer[neighbor]
-			neighborIsCloserThanFurthest := distance(query.Vector, neighborVertex.Vector) < distance(query.Vector, furthest.Vector)
+			neighborIsCloserThanFurthest := v.Distance(query.Vector, neighborVertex.Vector) < v.Distance(query.Vector, furthest.Vector)
 
 			if neighborIsCloserThanFurthest || len(W) < efSize {
 				candidates.Add(int(neighbor))
@@ -136,18 +132,16 @@ func searchLayer(query g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize i
 
 }
 
-func initSearchLayerSets(entrancePoint g.ID) (s.Set, s.Set, s.Set) {
-	visited := s.Set{} //vertices we have visited
-	visited.Add(int(entrancePoint))
-	candidates := s.Set{} //set of possible found nearest neighbors
-	candidates.Add(int(entrancePoint))
-	W := s.Set{} //dynamic list of found nearest neighbors
-	W.Add(int(entrancePoint))
+func initSearchLayerHeaps(entrancePoint g.Vertex, query g.Vertex) (q.PriorityQueue, q.PriorityQueue) {
+	candidates := q.New(query) //set of possible found nearest neighbors
+	candidates.Push(entrancePoint)
 
-	return visited, candidates, W
+	W := q.New(query) //dynamic list of found nearest neighbors
+	W.Push(entrancePoint)
+
+	return candidates, W
 
 }
-
 func selectNeighbors(vertex g.Vertex, W s.Set, M int, layer g.Graph) []g.Vertex { //simple
 	if W.Has(int(vertex.Id)) {
 		W.Delete(int(vertex.Id))
@@ -160,7 +154,7 @@ func selectNeighbors(vertex g.Vertex, W s.Set, M int, layer g.Graph) []g.Vertex 
 	}
 
 	sort.Slice(vertices, func(i, j int) bool {
-		return distance(vertex.Vector, vertices[i].Vector) > distance(vertex.Vector, vertices[j].Vector)
+		return v.Distance(vertex.Vector, vertices[i].Vector) > v.Distance(vertex.Vector, vertices[j].Vector)
 	})
 
 	return vertices[:min(len(vertices), M)]
@@ -178,18 +172,6 @@ func calculateLevel(levelMultiplier float64) int {
 	return int(level)
 }
 
-func distance(v1 []int, v2 []int) float64 {
-	if len(v1) != len(v2) {
-		return math.Inf(1) // or any other error handling
-	}
-	sum := 0.0
-	for i := 0; i < len(v1); i++ {
-		diff := float64(v1[i] - v2[i])
-		sum += diff * diff
-	}
-	return math.Sqrt(sum)
-}
-
 func getClosest(vertex g.Vertex, candidates s.Set, level g.Graph) g.Vertex {
 	closestDist := math.Inf(1)
 	randomId := candidates.GetRandom()
@@ -200,7 +182,7 @@ func getClosest(vertex g.Vertex, candidates s.Set, level g.Graph) g.Vertex {
 			return g.Vertex{}
 		}
 
-		distance := distance(vertex.Vector, candidate.Vector)
+		distance := v.Distance(vertex.Vector, candidate.Vector)
 		if distance <= closestDist || distance == math.Inf(1) {
 			closest = candidate
 			closestDist = distance
@@ -219,7 +201,7 @@ func getFurthest(vertex g.Vertex, candidates s.Set, level g.Graph) g.Vertex {
 			return g.Vertex{}
 		}
 
-		distance := distance(vertex.Vector, candidate.Vector)
+		distance := v.Distance(vertex.Vector, candidate.Vector)
 		if distance > furthestDist || distance == math.Inf(1) {
 			furthest = candidate
 			furthestDist = distance
@@ -262,7 +244,7 @@ func getKClosest(W s.Set, vertex g.Vertex, k int, layer g.Graph) []g.Vertex {
 	}
 
 	sort.Slice(vertices, func(i, j int) bool {
-		return distance(vertex.Vector, vertices[i].Vector) > distance(vertex.Vector, vertices[j].Vector)
+		return v.Distance(vertex.Vector, vertices[i].Vector) > v.Distance(vertex.Vector, vertices[j].Vector)
 	})
 
 	return vertices[:min(len(vertices), k)]
