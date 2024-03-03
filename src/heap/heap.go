@@ -4,19 +4,26 @@ import (
 	"fmt"
 )
 
-type heap []int
+//this is a minheap
 
-type Heap interface {
+type Heap []Element
+
+type Element struct {
+	weight  int
+	element int
+}
+
+type heap interface {
 	Insert()
 	Delete()
 	Peek()
 }
 
-func New() heap {
-	return heap{}
+func New() Heap {
+	return Heap{}
 }
 
-func Heapify(arr []int) heap {
+func Heapify(arr []Element) Heap {
 	h := New()
 	for _, elem := range arr {
 		h.Insert(elem)
@@ -24,7 +31,7 @@ func Heapify(arr []int) heap {
 	return h
 }
 
-func (h *heap) down() {
+func (h *Heap) down() {
 	idx := 0
 	size := len(*h)
 	for {
@@ -32,10 +39,10 @@ func (h *heap) down() {
 		right := 2*idx + 2
 
 		smallest := idx
-		if left < size && (*h)[left] < (*h)[smallest] {
+		if left < size && (*h)[left].weight < (*h)[smallest].weight {
 			smallest = left
 		}
-		if right < size && (*h)[right] < (*h)[smallest] {
+		if right < size && (*h)[right].weight < (*h)[smallest].weight {
 			smallest = right
 		}
 
@@ -49,7 +56,7 @@ func (h *heap) down() {
 	}
 }
 
-func (h *heap) up() {
+func (h *Heap) up() {
 	i := len(*h) - 1
 
 	elem := (*h)[i]
@@ -60,7 +67,7 @@ func (h *heap) up() {
 
 	newIndex := i
 	parentVal := (*h)[int(parent)]
-	for elem < parentVal {
+	for elem.weight < parentVal.weight {
 		fmt.Println(elem, parentVal)
 
 		h.swap(newIndex, int(parent))
@@ -74,13 +81,13 @@ func (h *heap) up() {
 	}
 }
 
-func (h *heap) Insert(element int) heap {
+func (h *Heap) Insert(element Element) Heap {
 	*h = append(*h, element)
 	h.up()
 	return *h
 }
 
-func (h *heap) Delete(element int) int {
+func (h *Heap) Delete() Element {
 	min := (*h)[0]
 
 	//push root to back and cut it off
@@ -94,13 +101,13 @@ func (h *heap) Delete(element int) int {
 	return min
 }
 
-func (h *heap) swap(idx1, idx2 int) {
+func (h *Heap) swap(idx1, idx2 int) {
 	(*h)[idx1], (*h)[idx2] = (*h)[idx2], (*h)[idx1]
 }
 
-func (h *heap) Peek() int {
+func (h *Heap) Peek() *Element {
 	if len(*h) < 1 {
-		return 0
+		return nil
 	}
-	return (*h)[0]
+	return &(*h)[0]
 }
