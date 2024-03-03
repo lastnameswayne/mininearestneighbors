@@ -43,14 +43,14 @@ func TestGraph(t *testing.T) {
 
 		//get neighborhood
 
-		assert.Equal(t, graph.Neighborhood(v1)[0], v2.Id)
-		assert.Equal(t, graph.Neighborhood(v2)[0], v1.Id)
+		assert.Equal(t, graph.Neighborhood(v1.Id)[0], v2.Id)
+		assert.Equal(t, graph.Neighborhood(v2.Id)[0], v1.Id)
 
 		//delete edge
 		graph.RemoveEdge(v1.Id, v2.Id)
 		v1 = graph[v1.Id]
 		v2 = graph[v2.Id]
-		assert.Len(t, graph.Neighborhood(v1), 0)
-		assert.Len(t, graph.Neighborhood(v2), 0)
+		assert.Len(t, graph.Neighborhood(v1.Id), 0)
+		assert.Len(t, graph.Neighborhood(v2.Id), 0)
 	})
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	g "github.com/lastnameswayne/mininearestneighbors/src/graph"
+	v "github.com/lastnameswayne/mininearestneighbors/src/vector"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,7 +49,7 @@ func TestInsertPoint(t *testing.T) {
 	t.Run("vector is inserted into bottom layer", func(t *testing.T) {
 		//All inserted vectors will be in the bottom layer
 
-		v1 := Vector{
+		v1 := v.Vector{
 			Id:     1,
 			Vector: []int{1, 2, 3, 4, 5},
 		}
@@ -65,23 +66,23 @@ func TestInsertPoint(t *testing.T) {
 	})
 
 	t.Run("inserting five vectors has five in the bottom layer", func(t *testing.T) {
-		v1 := Vector{
+		v1 := v.Vector{
 			Id:     1,
 			Vector: []int{100, 1002, 313, 314, 580},
 		}
-		v2 := Vector{
+		v2 := v.Vector{
 			Id:     2,
 			Vector: []int{2, 2, 3, 5, 5},
 		}
-		v3 := Vector{
+		v3 := v.Vector{
 			Id:     3,
 			Vector: []int{10000, 10000, 10000, 10000, 10000},
 		}
-		v4 := Vector{
+		v4 := v.Vector{
 			Id:     4,
 			Vector: []int{1, 2, 3, 4, 5}}
 
-		vs := []Vector{v1, v2, v3, v4}
+		vs := []v.Vector{v1, v2, v3, v4}
 
 		for _, vector := range vs {
 			hnsw = hnsw.InsertVector(vector, efSize, M, M_max)
@@ -104,19 +105,32 @@ func TestSearchLayer(t *testing.T) {
 
 		nearestInLayer := searchLayer(q, layer0, hnsw.EntrancePoint, 2)
 
-		asList := nearestInLayer.UnsortedList()
+		asList := nearestInLayer.Elements()
+		t.Log(asList)
 
-		assert.Contains(t, asList, 2)
-		assert.Contains(t, asList, 4)
+		found2 := false
+		found1 := false
+		for _, elem := range asList {
+			if elem.Vertex.Id == 2 {
+				found2 = true
+			}
+			if elem.Vertex.Id == 4 {
+				found1 = true
+			}
+		}
+
+		assert.True(t, found1)
+		assert.True(t, found2)
+
 	})
 
 	t.Run("entry point in top layer should be node 1", func(t *testing.T) {
 		topLayer := hnsw.getTopLayer()
 		nearestInLayer := searchLayer(q, topLayer, hnsw.EntrancePoint, 1)
 
-		asList := nearestInLayer.UnsortedList()
+		asList := nearestInLayer.Elements()
 
-		assert.Equal(t, asList[0], 1)
+		assert.Equal(t, asList[0].Vertex.Id, g.ID(1))
 
 	})
 
@@ -125,10 +139,20 @@ func TestSearchLayer(t *testing.T) {
 
 		nearestInLayer := searchLayer(q, layer1, hnsw.EntrancePoint, 2)
 
-		asList := nearestInLayer.UnsortedList()
+		asList := nearestInLayer.Elements()
+		found2 := false
+		found1 := false
+		for _, elem := range asList {
+			if elem.Vertex.Id == 1 {
+				found2 = true
+			}
+			if elem.Vertex.Id == 2 {
+				found1 = true
+			}
+		}
 
-		assert.Contains(t, asList, 1)
-		assert.Contains(t, asList, 2)
+		assert.True(t, found1)
+		assert.True(t, found2)
 	})
 
 }

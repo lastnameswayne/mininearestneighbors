@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	h "github.com/lastnameswayne/mininearestneighbors/src/hnsw"
+	v "github.com/lastnameswayne/mininearestneighbors/src/vector"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -75,7 +76,7 @@ func Read() {
 	}
 	fmt.Println("Done")
 	ints := []int{63, 71, 51, 50}
-	q := h.Vector{
+	q := v.Vector{
 		Id:     123,
 		Vector: ints,
 	}
@@ -83,7 +84,7 @@ func Read() {
 	fmt.Println(res)
 }
 
-func mapToVector(m ProductMeasurements) []h.Vector {
+func mapToVector(m ProductMeasurements) []v.Vector {
 	ssenseID, err := strconv.ParseInt(m.SSenseProductID, 10, 64)
 	if err != nil {
 		panic(err)
@@ -95,12 +96,12 @@ func mapToVector(m ProductMeasurements) []h.Vector {
 
 }
 
-func mapMeasurement(measurements []Measurement, ssenseID int) []h.Vector {
-	res := []h.Vector{}
+func mapMeasurement(measurements []Measurement, ssenseID int) []v.Vector {
+	res := []v.Vector{}
 
 	sizeToInts := fillMap(measurements)
 	for size, vals := range sizeToInts {
-		vector := h.Vector{
+		vector := v.Vector{
 			Id:     addsizetoId(ssenseID, size),
 			Size:   size,
 			Vector: vals,

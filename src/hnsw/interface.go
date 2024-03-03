@@ -1,8 +1,11 @@
 package hnsw
 
-import g "github.com/lastnameswayne/mininearestneighbors/src/graph"
+import (
+	g "github.com/lastnameswayne/mininearestneighbors/src/graph"
+	v "github.com/lastnameswayne/mininearestneighbors/src/vector"
+)
 
 type HNSW interface {
-	InsertVector(queryVector Vector, efSize int, M int, mMax int) hnsw
-	Search(q Vector, efSize int, k int) []g.Vertex
+	InsertVector(v.Vector, int, int, int) hnsw
+	Search(v.Vector, int, int) []g.Vertex
 }

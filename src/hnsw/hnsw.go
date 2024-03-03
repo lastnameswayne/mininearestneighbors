@@ -30,7 +30,7 @@ func ConstructHNSW(layerAmount int) hnsw {
 	}
 }
 
-func (hnsw *hnsw) Search(query v.Vector, efSize int, k int) []heap.Element {
+func (hnsw *hnsw) Search(query v.Vector, efSize int, k int) []g.Vertex {
 	queryElement := g.Vertex{
 		Vector: query.Vector,
 		Id:     g.ID(query.Id),
@@ -46,7 +46,14 @@ func (hnsw *hnsw) Search(query v.Vector, efSize int, k int) []heap.Element {
 		ep = W.Peek().Vertex
 	}
 	W = searchLayer(queryElement, hnsw.Layers[0], ep, efSize)
-	return getKClosest(W.Elements(), queryElement, k, hnsw.Layers[0])
+
+	closest := getKClosest(W.Elements(), queryElement, k, hnsw.Layers[0]) //this should be heap sort
+
+	res := []g.Vertex{}
+	for _, elem := range closest {
+		res = append(res, elem.Vertex)
+	}
+	return res
 }
 
 func (hnsw hnsw) InsertVector(queryVector v.Vector, efSize int, M int, mMax int) hnsw {
@@ -102,9 +109,9 @@ func searchLayer(query g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize i
 
 	for candidates.Size() > 0 {
 		nearest := candidates.Pop()
-		furthest := W.Pop()
+		furthest := W.Peek()
 
-		if nearest.Weight > furthest.Weight {
+		if nearest.Weight > furthest.GetWeight() {
 			break //all elements in a layer have been evaluated
 		}
 
@@ -116,10 +123,8 @@ func searchLayer(query g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize i
 
 			visited.Add(int(neighbor))
 
-			furthest := W.Pop()
-
 			neighborVertex := layer[neighbor]
-			neighborIsCloserThanFurthest := v.Distance(query.Vector, neighborVertex.Vector) < furthest.Weight
+			neighborIsCloserThanFurthest := v.Distance(query.Vector, neighborVertex.Vector) < furthest.GetWeight()
 
 			if neighborIsCloserThanFurthest || W.Size() < efSize {
 				candidates.Push(neighborVertex)

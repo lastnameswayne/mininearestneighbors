@@ -113,7 +113,7 @@ func (h *Heap) Delete() Element {
 }
 
 func (h *Heap) Elements() []Element {
-	res := make([]Element, len(h.heap))
+	res := make([]Element, 0)
 	res = append(res, h.heap...)
 	return res
 }
@@ -130,5 +130,16 @@ func (h *Heap) Peek() *Element {
 }
 
 func (h *Heap) Size() int {
+	if h == nil {
+		return 0
+	}
 	return len(h.heap)
+}
+
+func (e *Element) GetWeight() float64 {
+	if e == nil {
+		return 100000000000000
+	}
+
+	return e.Weight
 }
