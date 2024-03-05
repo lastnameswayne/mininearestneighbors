@@ -53,7 +53,7 @@ type ProductMeasurements struct {
 }
 
 func Read() {
-	layerCount := 30
+	layerCount := 10
 	M := 5
 	mMax := 2 * M //recommended
 	efSize := 5

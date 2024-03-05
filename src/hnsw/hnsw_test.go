@@ -40,21 +40,24 @@ func TestSetNewNeighborhood(t *testing.T) {
 
 }
 
+func TestselectNeighbors(t *testing.T) {
+
+}
+
 func TestInsertPoint(t *testing.T) {
 	layerCount := 3
 	efSize := 3
 	M := 2
 	M_max := 4
-	hnsw := ConstructHNSW(layerCount)
 	t.Run("vector is inserted into bottom layer", func(t *testing.T) {
 		//All inserted vectors will be in the bottom layer
-
+		hnsw := ConstructHNSW(layerCount)
 		v1 := v.Vector{
 			Id:     1,
 			Vector: []int{1, 2, 3, 4, 5},
 		}
 
-		hnsw := hnsw.InsertVector(v1, efSize, M, M_max)
+		hnsw = hnsw.InsertVector(v1, efSize, M, M_max)
 
 		found := false
 		for _, item := range hnsw.Layers[0] {
@@ -66,6 +69,7 @@ func TestInsertPoint(t *testing.T) {
 	})
 
 	t.Run("inserting five vectors has five in the bottom layer", func(t *testing.T) {
+		hnsw := ConstructHNSW(layerCount)
 		v1 := v.Vector{
 			Id:     1,
 			Vector: []int{100, 1002, 313, 314, 580},
@@ -88,7 +92,32 @@ func TestInsertPoint(t *testing.T) {
 			hnsw = hnsw.InsertVector(vector, efSize, M, M_max)
 		}
 
+		found := false
 		assert.Len(t, hnsw.Layers[0], 5) //4 plus the dummy node
+		for _, vertex := range hnsw.Layers[0] {
+			assert.True(t, len(vertex.Edges) <= M_max)
+			for _, neighbor := range vertex.Edges {
+				if neighbor != g.ID(0) {
+					found = true
+					break
+				}
+			}
+
+		}
+		assert.True(t, found)
+
+		foundLayer1 := false
+		for _, vertex := range hnsw.Layers[1] {
+			assert.True(t, len(vertex.Edges) <= M)
+			for _, neighbor := range vertex.Edges {
+				if neighbor != g.ID(0) {
+					foundLayer1 = true
+					break
+				}
+			}
+
+		}
+		assert.True(t, foundLayer1)
 	})
 }
 
