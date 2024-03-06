@@ -18,12 +18,12 @@ type hnsw struct {
 	EntrancePoint g.Vertex
 }
 
-var _dummyNode = g.Vertex{Id: 0, Vector: []int{100000000, 10000, 10000, 10000, 10000}}
+var _dummyNode = g.Vertex{Id: "0", Vector: []int{100000000, 10000, 10000, 10000, 10000}}
 
 func ConstructHNSW(layerAmount int) hnsw {
 	layers := map[int]g.Graph{}
 	for i := 0; i < layerAmount; i++ {
-		layers[i] = g.Graph{g.ID(0): _dummyNode}
+		layers[i] = g.Graph{g.ID("0"): _dummyNode}
 	}
 	return hnsw{
 		Layers:        layers,
@@ -106,7 +106,7 @@ func (hnsw hnsw) InsertVector(queryVector v.Vector, efSize int, M int, mMax int)
 // does a greedy search over a layer, and each layer is a graph by itself
 func searchLayer(query g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize int) *q.PriorityQueue {
 	visited := s.Set{} //vertices we have visited
-	visited.Add(int(entrancePoint.Id))
+	visited.Add(string(entrancePoint.Id))
 	candidates, W := initSearchLayerHeaps(entrancePoint, query)
 
 	for candidates.Size() > 0 {
@@ -119,11 +119,11 @@ func searchLayer(query g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize i
 
 		neighborhood := layer.Neighborhood(nearest.Vertex.Id)
 		for _, neighbor := range neighborhood {
-			if visited.Has(int(neighbor)) {
+			if visited.Has(string(neighbor)) {
 				continue
 			}
 
-			visited.Add(int(neighbor))
+			visited.Add(string(neighbor))
 
 			neighborVertex := layer[neighbor]
 			neighborIsCloserThanFurthest := v.Distance(query.Vector, neighborVertex.Vector) < furthest.GetWeight()
@@ -154,10 +154,6 @@ func initSearchLayerHeaps(entrancePoint g.Vertex, query g.Vertex) (*q.PriorityQu
 
 }
 func selectNeighbors(vertex g.Vertex, W []g.ID, M int, layer g.Graph) []g.Vertex { //simple
-	// if W.Has(int(vertex.Id)) {
-	// 	W.Delete(int(vertex.Id))
-	// }
-
 	vertices := make([]g.Vertex, 0)
 	for _, id := range W {
 		vertex := layer[g.ID(id)]

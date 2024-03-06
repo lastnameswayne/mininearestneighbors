@@ -9,12 +9,12 @@ import (
 
 func TestHeapify(t *testing.T) {
 	elems := []Element{
-		{Weight: 1, Vertex: g.Vertex{Id: g.ID(1)}},
-		{Weight: 5, Vertex: g.Vertex{Id: g.ID(2)}},
-		{Weight: 3, Vertex: g.Vertex{Id: g.ID(3)}},
-		{Weight: 6, Vertex: g.Vertex{Id: g.ID(4)}},
-		{Weight: 7, Vertex: g.Vertex{Id: g.ID(5)}},
-		{Weight: -1, Vertex: g.Vertex{Id: g.ID(6)}},
+		{Weight: 1, Vertex: g.Vertex{Id: g.ID("1")}},
+		{Weight: 5, Vertex: g.Vertex{Id: g.ID("2")}},
+		{Weight: 3, Vertex: g.Vertex{Id: g.ID("3")}},
+		{Weight: 6, Vertex: g.Vertex{Id: g.ID("4")}},
+		{Weight: 7, Vertex: g.Vertex{Id: g.ID("5")}},
+		{Weight: -1, Vertex: g.Vertex{Id: g.ID("6")}},
 	}
 
 	var heap = New(Min)
@@ -31,15 +31,15 @@ func TestHeapify(t *testing.T) {
 
 	heap = New(Min)
 	elems = []Element{
-		{Weight: 9, Vertex: g.Vertex{Id: g.ID(1)}},
-		{Weight: 31, Vertex: g.Vertex{Id: g.ID(2)}},
-		{Weight: 40, Vertex: g.Vertex{Id: g.ID(3)}},
-		{Weight: 22, Vertex: g.Vertex{Id: g.ID(4)}},
-		{Weight: 10, Vertex: g.Vertex{Id: g.ID(5)}},
-		{Weight: 15, Vertex: g.Vertex{Id: g.ID(6)}},
-		{Weight: 1, Vertex: g.Vertex{Id: g.ID(7)}},
-		{Weight: 25, Vertex: g.Vertex{Id: g.ID(8)}},
-		{Weight: 91, Vertex: g.Vertex{Id: g.ID(9)}},
+		{Weight: 9, Vertex: g.Vertex{Id: g.ID("1")}},
+		{Weight: 31, Vertex: g.Vertex{Id: g.ID("2")}},
+		{Weight: 40, Vertex: g.Vertex{Id: g.ID("3")}},
+		{Weight: 22, Vertex: g.Vertex{Id: g.ID("4")}},
+		{Weight: 10, Vertex: g.Vertex{Id: g.ID("5")}},
+		{Weight: 15, Vertex: g.Vertex{Id: g.ID("6")}},
+		{Weight: 1, Vertex: g.Vertex{Id: g.ID("7")}},
+		{Weight: 25, Vertex: g.Vertex{Id: g.ID("8")}},
+		{Weight: 91, Vertex: g.Vertex{Id: g.ID("9")}},
 	}
 	heap.Heapify(elems)
 
@@ -49,12 +49,12 @@ func TestHeapify(t *testing.T) {
 
 func TestMaxHeap(t *testing.T) {
 	elems := []Element{
-		{Weight: 1, Vertex: g.Vertex{Id: g.ID(1)}},
-		{Weight: 5, Vertex: g.Vertex{Id: g.ID(2)}},
-		{Weight: 3, Vertex: g.Vertex{Id: g.ID(3)}},
-		{Weight: 6, Vertex: g.Vertex{Id: g.ID(4)}},
-		{Weight: 7, Vertex: g.Vertex{Id: g.ID(5)}},
-		{Weight: -1, Vertex: g.Vertex{Id: g.ID(6)}},
+		{Weight: 1, Vertex: g.Vertex{Id: g.ID("1")}},
+		{Weight: 5, Vertex: g.Vertex{Id: g.ID("2")}},
+		{Weight: 3, Vertex: g.Vertex{Id: g.ID("3")}},
+		{Weight: 6, Vertex: g.Vertex{Id: g.ID("4")}},
+		{Weight: 7, Vertex: g.Vertex{Id: g.ID("5")}},
+		{Weight: -1, Vertex: g.Vertex{Id: g.ID("6")}},
 	}
 
 	var heap = New(Max)
@@ -65,15 +65,15 @@ func TestMaxHeap(t *testing.T) {
 
 	heap = New(Max)
 	elems = []Element{
-		{Weight: 9, Vertex: g.Vertex{Id: g.ID(1)}},
-		{Weight: 31, Vertex: g.Vertex{Id: g.ID(2)}},
-		{Weight: 40, Vertex: g.Vertex{Id: g.ID(3)}},
-		{Weight: 22, Vertex: g.Vertex{Id: g.ID(4)}},
-		{Weight: 10, Vertex: g.Vertex{Id: g.ID(5)}},
-		{Weight: 15, Vertex: g.Vertex{Id: g.ID(6)}},
-		{Weight: 1, Vertex: g.Vertex{Id: g.ID(7)}},
-		{Weight: 25, Vertex: g.Vertex{Id: g.ID(8)}},
-		{Weight: 91, Vertex: g.Vertex{Id: g.ID(9)}},
+		{Weight: 9, Vertex: g.Vertex{Id: g.ID("1")}},
+		{Weight: 31, Vertex: g.Vertex{Id: g.ID("2")}},
+		{Weight: 40, Vertex: g.Vertex{Id: g.ID("3")}},
+		{Weight: 22, Vertex: g.Vertex{Id: g.ID("4")}},
+		{Weight: 10, Vertex: g.Vertex{Id: g.ID("5")}},
+		{Weight: 15, Vertex: g.Vertex{Id: g.ID("6")}},
+		{Weight: 1, Vertex: g.Vertex{Id: g.ID("7")}},
+		{Weight: 25, Vertex: g.Vertex{Id: g.ID("8")}},
+		{Weight: 91, Vertex: g.Vertex{Id: g.ID("9")}},
 	}
 	heap.Heapify(elems)
 

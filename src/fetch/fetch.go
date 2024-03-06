@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 
 	h "github.com/lastnameswayne/mininearestneighbors/src/hnsw"
 	v "github.com/lastnameswayne/mininearestneighbors/src/vector"
@@ -53,10 +52,10 @@ type ProductMeasurements struct {
 }
 
 func Read() {
-	layerCount := 10
+	layerCount := 15
 	M := 5
 	mMax := 2 * M //recommended
-	efSize := 5
+	efSize := 50
 	hnsw := h.ConstructHNSW(layerCount)
 	cursor := fetch()
 
@@ -68,20 +67,24 @@ func Read() {
 		resultMapped := mapToVector(result)
 		for _, vector := range resultMapped {
 			hnsw = hnsw.InsertVector(vector, efSize, M, mMax)
-			// fmt.Println("inserted", vector.Id, vector.Size)
+			fmt.Println("inserted", vector.Id, vector.Size)
 		}
 	}
 	if err := cursor.Err(); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Done")
-	ints := []int{63, 71, 51, 50}
+	ints := []int{63, 73, 55, 67}
+	//chest, length, shoulder, sleeve length
 	q := v.Vector{
-		Id:     123,
+		Id:     "123",
 		Vector: ints,
 	}
-	res := hnsw.Search(q, efSize, 10)
+	res := hnsw.Search(q, efSize, 50)
 	fmt.Println(res)
+	for idx, vertex := range res {
+		fmt.Println("item", idx, vertex.Id, "distance", v.Distance(vertex.Vector, q.Vector), "and sizes", q.Vector)
+	}
 }
 
 func mapToVector(m ProductMeasurements) []v.Vector {
@@ -112,39 +115,8 @@ func mapMeasurement(measurements []Measurement, ssenseID int) []v.Vector {
 	return res
 }
 
-func addsizetoId(id int, size string) int {
-	asstring := strconv.Itoa(id)
-	sizecode := sizecode(size)
-	sizecodestring := strconv.Itoa(sizecode)
-	val, err := strconv.ParseInt(asstring+sizecodestring, 10, 64)
-	if err != nil {
-		panic(err)
-	}
-	return int(val)
-
-}
-
-func sizecode(size string) int {
-	switch strings.ToUpper(size) {
-	case "XXXL", "56":
-		return 7
-	case "XXL", "54":
-		return 6
-	case "XL", "52":
-		return 5
-	case "L", "50":
-		return 4
-	case "M", "48":
-		return 3
-	case "S", "46":
-		return 2
-	case "XS", "44":
-		return 1
-	case "XXS", "42":
-		return 0
-	default:
-		return 10
-	}
+func addsizetoId(id int, size string) string {
+	return strconv.Itoa(id) + size
 }
 
 func fillMap(measurements []Measurement) map[string][]int {

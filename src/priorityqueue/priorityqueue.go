@@ -27,12 +27,12 @@ func New(query g.Vertex, sort heap.Type) *PriorityQueue {
 
 func (p *PriorityQueue) Pop() heap.Element {
 	deleted := p.queue.Delete()
-	p.set.Delete(int(deleted.Vertex.Id))
+	p.set.Delete(string(deleted.Vertex.Id))
 	return deleted
 }
 
 func (p *PriorityQueue) Push(vertex g.Vertex) {
-	if p.set.Has(int(vertex.Id)) {
+	if p.set.Has(string(vertex.Id)) {
 		return
 	}
 	weight := v.Distance(vertex.Vector, p.query.Vector)
@@ -43,7 +43,7 @@ func (p *PriorityQueue) Push(vertex g.Vertex) {
 	}
 
 	p.queue.Insert(elem)
-	p.set.Add(int(vertex.Id))
+	p.set.Add(string(vertex.Id))
 }
 
 func (p *PriorityQueue) Peek() *heap.Element {

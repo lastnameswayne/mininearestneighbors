@@ -12,13 +12,13 @@ func TestGraph(t *testing.T) {
 
 	t.Run("adds two vertex and edge between two", func(t *testing.T) {
 		v1 := g.Vertex{
-			Id:     1,
+			Id:     "1",
 			Vector: []int{1, 2, 3, 4, 5},
 			Edges:  make([]g.ID, 0),
 		}
 
 		v2 := g.Vertex{
-			Id:     2,
+			Id:     "2",
 			Vector: []int{2, 2, 3, 5, 5},
 			Edges:  make([]g.ID, 0),
 		}

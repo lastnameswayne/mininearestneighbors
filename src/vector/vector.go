@@ -3,7 +3,7 @@ package vector
 import "math"
 
 type Vector struct {
-	Id     int
+	Id     string
 	Size   string
 	Vector []int
 }

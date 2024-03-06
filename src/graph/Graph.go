@@ -1,6 +1,6 @@
 package Graph
 
-type ID int
+type ID string
 type Vertex struct {
 	Id     ID
 	Vector []int
