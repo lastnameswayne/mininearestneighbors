@@ -2,53 +2,153 @@
 
 
 ### Searching for my favorite long sleeves measurements chest 63, length 73, shoulder 55 sleeve length 67
-item 0 14067131S distance 2.8284271247461903 and sizes [63 73 55 67]
-item 1 13845011XXL distance 2.8284271247461903 and sizes [63 73 55 67]
-item 2 14064871XL distance 2.8284271247461903 and sizes [63 73 55 67]
-item 3 13846021M distance 2.6457513110645907 and sizes [63 73 55 67]
-item 4 14204691M distance 2.6457513110645907 and sizes [63 73 55 67]
-item 5 1431524141 distance 2.6457513110645907 and sizes [63 73 55 67]
-item 6 14245931XL distance 2.6457513110645907 and sizes [63 73 55 67]
-item 7 13716141XL distance 2.6457513110645907 and sizes [63 73 55 67]
-item 8 1394803152 distance 2.6457513110645907 and sizes [63 73 55 67]
-item 9 14187271M distance 2.6457513110645907 and sizes [63 73 55 67]
-item 10 1423423154 distance 2.6457513110645907 and sizes [63 73 55 67]
-item 11 1394882150 distance 2.6457513110645907 and sizes [63 73 55 67]
-item 12 13845071XL distance 2.449489742783178 and sizes [63 73 55 67]
-item 13 13331861L distance 2.449489742783178 and sizes [63 73 55 67]
-item 14 140167413 distance 2.449489742783178 and sizes [63 73 55 67]
-item 15 13820651XL distance 2.449489742783178 and sizes [63 73 55 67]
-item 16 13853971XL distance 2.449489742783178 and sizes [63 73 55 67]
-item 17 13462971XL distance 2.449489742783178 and sizes [63 73 55 67]
-item 18 1394816150 distance 2.449489742783178 and sizes [63 73 55 67]
-item 19 14063331XXL distance 2.449489742783178 and sizes [63 73 55 67]
-item 20 13922181XL distance 2.449489742783178 and sizes [63 73 55 67]
-item 21 13523781XXL distance 2.449489742783178 and sizes [63 73 55 67]
-item 22 13477431XXL distance 2.449489742783178 and sizes [63 73 55 67]
-item 23 14077821XL distance 2.449489742783178 and sizes [63 73 55 67]
-item 24 1380620152 distance 2.449489742783178 and sizes [63 73 55 67]
-item 25 138160813 distance 2.449489742783178 and sizes [63 73 55 67]
-item 26 13716131XL distance 2.449489742783178 and sizes [63 73 55 67]
-item 27 13711401XL distance 2.449489742783178 and sizes [63 73 55 67]
-item 28 14054841XXL distance 2.23606797749979 and sizes [63 73 55 67]
-item 29 1400694148 distance 2.23606797749979 and sizes [63 73 55 67]
-item 30 13987001L distance 2.23606797749979 and sizes [63 73 55 67]
-item 31 14166521XL distance 2.23606797749979 and sizes [63 73 55 67]
-item 32 1394802150 distance 2.23606797749979 and sizes [63 73 55 67]
-item 33 13647461XL distance 2.23606797749979 and sizes [63 73 55 67]
-item 34 13968051L distance 2.23606797749979 and sizes [63 73 55 67]
-item 35 1431524142 distance 2.23606797749979 and sizes [63 73 55 67]
-item 36 14508771XXL distance 2.23606797749979 and sizes [63 73 55 67]
-item 37 13879501XL distance 2.23606797749979 and sizes [63 73 55 67]
-item 38 14095381XXL distance 2 and sizes [63 73 55 67]
-item 39 138160814 distance 2 and sizes [63 73 55 67]
-item 40 13853961L distance 2 and sizes [63 73 55 67]
-item 41 1402744150 distance 1.7320508075688772 and sizes [63 73 55 67]
-item 42 14279161L distance 1.7320508075688772 and sizes [63 73 55 67]
-item 43 13647491XL distance 1.7320508075688772 and sizes [63 73 55 67]
-item 44 13647481XL distance 1.7320508075688772 and sizes [63 73 55 67]
-item 45 14282451L distance 1.7320508075688772 and sizes [63 73 55 67]
-item 46 14087161XXL distance 1.7320508075688772 and sizes [63 73 55 67]
-item 47 13834881XL distance 1.4142135623730951 and sizes [63 73 55 67]
-item 48 13834871XXL distance 1.4142135623730951 and sizes [63 73 55 67]
-item 49 13984121XL distance 1.4142135623730951 and sizes [63 73 55 67]
+- item 0: 14067131S
+  - Distance: 2.8284271247461903
+  - Sizes: [63 73 55 67]
+- item 1: 13845011XXL
+  - Distance: 2.8284271247461903
+  - Sizes: [63 73 55 67]
+- item 2: 14064871XL
+  - Distance: 2.8284271247461903
+  - Sizes: [63 73 55 67]
+- item 3: 13846021M
+  - Distance: 2.6457513110645907
+  - Sizes: [63 73 55 67]
+- item 4: 14204691M
+  - Distance: 2.6457513110645907
+  - Sizes: [63 73 55 67]
+- item 5: 1431524141
+  - Distance: 2.6457513110645907
+  - Sizes: [63 73 55 67]
+- item 6: 14245931XL
+  - Distance: 2.6457513110645907
+  - Sizes: [63 73 55 67]
+- item 7: 13716141XL
+  - Distance: 2.6457513110645907
+  - Sizes: [63 73 55 67]
+- item 8: 1394803152
+  - Distance: 2.6457513110645907
+  - Sizes: [63 73 55 67]
+- item 9: 14187271M
+  - Distance: 2.6457513110645907
+  - Sizes: [63 73 55 67]
+- item 10: 1423423154
+  - Distance: 2.6457513110645907
+  - Sizes: [63 73 55 67]
+- item 11: 1394882150
+  - Distance: 2.6457513110645907
+  - Sizes: [63 73 55 67]
+- item 12: 13845071XL
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 13: 13331861L
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 14: 140167413
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 15: 13820651XL
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 16: 13853971XL
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 17: 13462971XL
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 18: 1394816150
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 19: 14063331XXL
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 20: 13922181XL
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 21: 13523781XXL
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 22: 13477431XXL
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 23: 14077821XL
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 24: 1380620152
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 25: 138160813
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 26: 13716131XL
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 27: 13711401XL
+  - Distance: 2.449489742783178
+  - Sizes: [63 73 55 67]
+- item 28: 14054841XXL
+  - Distance: 2.23606797749979
+  - Sizes: [63 73 55 67]
+- item 29: 1400694148
+  - Distance: 2.23606797749979
+  - Sizes: [63 73 55 67]
+- item 30: 13987001L
+  - Distance: 2.23606797749979
+  - Sizes: [63 73 55 67]
+- item 31: 14166521XL
+  - Distance: 2.23606797749979
+  - Sizes: [63 73 55 67]
+- item 32: 1394802150
+  - Distance: 2.23606797749979
+  - Sizes: [63 73 55 67]
+- item 33: 13647461XL
+  - Distance: 2.23606797749979
+  - Sizes: [63 73 55 67]
+- item 34: 13968051L
+  - Distance: 2.23606797749979
+  - Sizes: [63 73 55 67]
+- item 35: 1431524142
+  - Distance: 2.23606797749979
+  - Sizes: [63 73 55 67]
+- item 36: 14508771XXL
+  - Distance: 2.23606797749979
+  - Sizes: [63 73 55 67]
+- item 37: 13879501XL
+  - Distance: 2.23606797749979
+  - Sizes: [63 73 55 67]
+- item 38: 14095381XXL
+  - Distance: 2
+  - Sizes: [63 73 55 67]
+- item 39: 138160814
+  - Distance: 2
+  - Sizes: [63 73 55 67]
+- item 40: 13853961L
+  - Distance: 2
+  - Sizes: [63 73 55 67]
+- item 41: 1402744150
+  - Distance: 1.7320508075688772
+  - Sizes: [63 73 55 67]
+- item 42: 14279161L
+  - Distance: 1.7320508075688772
+  - Sizes: [63 73 55 67]
+- item 43: 13647491XL
+  - Distance: 1.7320508075688772
+  - Sizes: [63 73 55 67]
+- item 44: 13647481XL
+  - Distance: 1.7320508075688772
+  - Sizes: [63 73 55 67]
+- item 45: 14282451L
+  - Distance: 1.7320508075688772
+  - Sizes: [63 73 55 67]
+- item 46: 14087161XXL
+  - Distance: 1.7320508075688772
+  - Sizes: [63 73 55 67]
+- item 47: 13834881XL
+  - Distance: 1.4142135623730951
+  - Sizes: [63 73 55 67]
+- item 48: 13834871XXL
+  - Distance: 1.4142135623730951
+  - Sizes: [63 73 55 67]
+- item 49: 13984121XL
+  - Distance: 1.4142135623730951
+  - Sizes: [63 73 55 67]
