@@ -6,10 +6,13 @@ import (
 	"math/rand"
 	"sort"
 
+	"encoding/json"
+
 	g "github.com/lastnameswayne/mininearestneighbors/src/graph"
 	"github.com/lastnameswayne/mininearestneighbors/src/heap"
 	q "github.com/lastnameswayne/mininearestneighbors/src/priorityqueue"
 	s "github.com/lastnameswayne/mininearestneighbors/src/set"
+
 	v "github.com/lastnameswayne/mininearestneighbors/src/vector"
 )
 
@@ -29,6 +32,23 @@ func ConstructHNSW(layerAmount int) hnsw {
 		Layers:        layers,
 		EntrancePoint: _dummyNode,
 	}
+}
+
+func (hnsw *hnsw) Serialize() ([]byte, error) {
+	res, err := json.Marshal(hnsw)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func Deserialize(hnswString []byte) (hnsw, error) {
+	var hnsw hnsw
+	err := json.Unmarshal(hnswString, &hnsw)
+	if err != nil {
+		return hnsw, err
+	}
+	return hnsw, nil
 }
 
 func (hnsw *hnsw) Search(query v.Vector, efSize int, k int) []g.Vertex {

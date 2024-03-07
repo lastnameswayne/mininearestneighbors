@@ -28,6 +28,29 @@ func TestConstructHNSW(t *testing.T) {
 
 }
 
+func TestSerialization(t *testing.T) {
+	t.Run("hnsw is serialized", func(t *testing.T) {
+		hnsw := testHNSW()
+		serialized, err := hnsw.Serialize()
+		assert.NoError(t, err)
+		assert.True(t, len(serialized) > 0)
+	})
+
+	t.Run("hnsw deserialized and serialized is the same", func(t *testing.T) {
+		hnsw := testHNSW()
+		serialized, err := hnsw.Serialize()
+		assert.NoError(t, err)
+
+		deserialized, err := Deserialize(serialized)
+		assert.NoError(t, err)
+
+		assert.Equal(t, hnsw, deserialized)
+	})
+}
+func TestDeserialize(t *testing.T) {
+
+}
+
 func TestGetClosest(t *testing.T) {
 
 }
