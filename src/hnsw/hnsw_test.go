@@ -54,7 +54,7 @@ func TestWriteFile(t *testing.T) {
 
 	t.Run("write file", func(t *testing.T) {
 
-		bytesAmount, err := WriteToFile(hnsw)
+		bytesAmount, err := hnsw.WriteToFile()
 		assert.NoError(t, err)
 		assert.True(t, bytesAmount > 0)
 		assert.FileExists(t, "/Users/tiarnanswayne/mininearestneighbors/src/hnsw/file.txt")

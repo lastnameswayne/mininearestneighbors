@@ -52,7 +52,7 @@ func Deserialize(hnswString []byte) (hnsw, error) {
 	return hnsw, nil
 }
 
-func WriteToFile(hnsw hnsw) (int, error) {
+func (hnsw *hnsw) WriteToFile() (int, error) {
 	file, err := os.Create("file.txt")
 
 	if err != nil {

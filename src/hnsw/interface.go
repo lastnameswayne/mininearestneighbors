@@ -8,4 +8,6 @@ import (
 type HNSW interface {
 	InsertVector(v.Vector, int, int, int) hnsw
 	Search(v.Vector, int, int) []g.Vertex
+	Serialize() ([]byte, error)
+	WriteToFile() (int, error)
 }
