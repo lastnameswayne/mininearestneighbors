@@ -1,6 +1,7 @@
 package hnsw
 
 import (
+	"os"
 	"testing"
 
 	g "github.com/lastnameswayne/mininearestneighbors/src/graph"
@@ -47,8 +48,36 @@ func TestSerialization(t *testing.T) {
 		assert.Equal(t, hnsw, deserialized)
 	})
 }
-func TestDeserialize(t *testing.T) {
+func TestWriteFile(t *testing.T) {
 
+	hnsw := testHNSW()
+
+	t.Run("write file", func(t *testing.T) {
+
+		bytesAmount, err := WriteToFile(hnsw)
+		assert.NoError(t, err)
+		assert.True(t, bytesAmount > 0)
+		assert.FileExists(t, "/Users/tiarnanswayne/mininearestneighbors/src/hnsw/file.txt")
+	})
+
+	t.Run("read file into hnsw", func(t *testing.T) {
+
+		f, err := os.Open("/Users/tiarnanswayne/mininearestneighbors/src/hnsw/file.txt")
+		assert.NoError(t, err)
+
+		fi, err := f.Stat()
+		assert.NoError(t, err)
+		bytes := make([]byte, fi.Size())
+
+		n, err := f.Read(bytes)
+		assert.NoError(t, err)
+		assert.True(t, n > 0)
+
+		newhnsw, err := Deserialize(bytes)
+		assert.NoError(t, err)
+		assert.Equal(t, hnsw, newhnsw)
+
+	})
 }
 
 func TestGetClosest(t *testing.T) {

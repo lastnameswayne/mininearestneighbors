@@ -7,6 +7,7 @@ import (
 	"sort"
 
 	"encoding/json"
+	"os"
 
 	g "github.com/lastnameswayne/mininearestneighbors/src/graph"
 	"github.com/lastnameswayne/mininearestneighbors/src/heap"
@@ -49,6 +50,22 @@ func Deserialize(hnswString []byte) (hnsw, error) {
 		return hnsw, err
 	}
 	return hnsw, nil
+}
+
+func WriteToFile(hnsw hnsw) (int, error) {
+	file, err := os.Create("file.txt")
+
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+
+	bytes, err := hnsw.Serialize()
+	if err != nil {
+		return 0, err
+	}
+
+	return file.Write(bytes)
 }
 
 func (hnsw *hnsw) Search(query v.Vector, efSize int, k int) []g.Vertex {
