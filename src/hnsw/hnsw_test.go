@@ -10,15 +10,18 @@ import (
 )
 
 func TestSearch(t *testing.T) {
-	q := v.Vector{Id: "10", Vector: []int{1, 2, 3, 4, 5}}
-	hnsw := testHNSW()
+	t.Run("correctly returns three closest", func(t *testing.T) {
 
-	efSize := 5
-	vertices := hnsw.Search(q, efSize, 3)
+		q := v.Vector{Id: "10", Vector: []int{1, 2, 3, 4, 5}}
+		hnsw := testHNSW()
 
-	assert.Equal(t, 3, len(vertices))
-	assert.Equal(t, g.ID("4"), vertices[0].Id)
-	assert.Equal(t, g.ID("2"), vertices[1].Id)
+		efSize := 5
+		vertices := hnsw.Search(q, efSize, 3)
+
+		assert.Equal(t, 3, len(vertices))
+		assert.Equal(t, g.ID("4"), vertices[0].Id)
+		assert.Equal(t, g.ID("2"), vertices[1].Id)
+	})
 }
 
 func TestConstructHNSW(t *testing.T) {
