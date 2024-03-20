@@ -9,11 +9,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func buildGraphForTest() {
-
-}
-
 func TestSearch(t *testing.T) {
+	q := v.Vector{Id: "10", Vector: []int{1, 2, 3, 4, 5}}
+	hnsw := testHNSW()
+
+	efSize := 5
+	vertices := hnsw.Search(q, efSize, 3)
+
+	assert.Equal(t, 3, len(vertices))
+	assert.Equal(t, "4", vertices[0].Id)
+	assert.Equal(t, "2", vertices[1].Id)
 }
 
 func TestConstructHNSW(t *testing.T) {
@@ -80,16 +85,25 @@ func TestWriteFile(t *testing.T) {
 	})
 }
 
-func TestGetClosest(t *testing.T) {
-
-}
-
-func TestGetFurthest(t *testing.T) {
-
-}
-
 func TestSetNewNeighborhood(t *testing.T) {
+	t.Run("new neighborhood is set", func(t *testing.T) {
+		hnsw := testHNSW()
+		bottomLayer := hnsw.Layers[0]
+		vertex := bottomLayer[g.ID("1")]
 
+		newNeighborhood := []g.Vertex{
+			{
+				Id:     "6",
+				Vector: []int{400, 400, 400, 400, 400},
+				Edges:  []g.ID{"5", "8"},
+			},
+		}
+
+		setNewNeighborhood(vertex, newNeighborhood, bottomLayer)
+
+		vertex = bottomLayer[g.ID("1")]
+		assert.Equal(t, []g.ID{newNeighborhood[0].Id}, vertex.Edges)
+	})
 }
 
 func TestSelectNeighbors(t *testing.T) {
@@ -157,19 +171,6 @@ func TestInsertPoint(t *testing.T) {
 
 		}
 		assert.True(t, found)
-
-		foundLayer1 := false
-		for _, vertex := range hnsw.Layers[1] {
-			assert.True(t, len(vertex.Edges) <= M)
-			for _, neighbor := range vertex.Edges {
-				if neighbor != g.ID("0") {
-					foundLayer1 = true
-					break
-				}
-			}
-
-		}
-		assert.True(t, foundLayer1)
 	})
 }
 

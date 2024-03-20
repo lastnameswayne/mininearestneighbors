@@ -231,13 +231,13 @@ func elementsToVertices(elements []heap.Element) []g.ID {
 	return res
 }
 
-func setNewNeighborhood(v g.Vertex, neighborhood []g.Vertex, layer g.Graph) {
+func setNewNeighborhood(v g.Vertex, newNeighborhood []g.Vertex, layer g.Graph) {
 	currNeighborhood := v.Edges
 	for _, n := range currNeighborhood {
 		layer.RemoveEdge(v.Id, n)
 	}
 
-	for _, n := range neighborhood {
+	for _, n := range newNeighborhood {
 		layer.AddEdge(v, n)
 	}
 }
