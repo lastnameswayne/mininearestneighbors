@@ -1,7 +1,6 @@
 package hnsw
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"sort"
@@ -84,9 +83,8 @@ func (hnsw *hnsw) Search(query v.Vector, efSize int, k int) []g.Vertex {
 		ep = W.Peek().Vertex
 	}
 	W = searchLayer(queryElement, hnsw.Layers[0], ep, efSize)
-	fmt.Println(W.Elements())
 
-	closest := getKClosest(W.Elements(), queryElement, k, hnsw.Layers[0]) //this should be heap sort
+	closest := getKClosest(W.Elements(), queryElement, k) //this should be heap sort
 
 	res := []g.Vertex{}
 	for _, elem := range closest {
@@ -242,12 +240,10 @@ func setNewNeighborhood(v g.Vertex, newNeighborhood []g.Vertex, layer g.Graph) {
 	}
 }
 
-func getKClosest(W []heap.Element, vertex g.Vertex, k int, layer g.Graph) []heap.Element {
-	elements := W
-
-	sort.Slice(elements, func(i, j int) bool {
-		return elements[i].Weight > elements[j].Weight
+func getKClosest(W []heap.Element, vertex g.Vertex, k int) []heap.Element {
+	sort.Slice(W, func(i, j int) bool {
+		return W[i].Weight < W[j].Weight
 	})
 
-	return elements[:min(len(elements), k)]
+	return W[:min(len(W), k)]
 }

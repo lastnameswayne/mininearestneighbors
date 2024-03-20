@@ -1,6 +1,7 @@
 package heap
 
 import (
+	"sort"
 	"testing"
 
 	g "github.com/lastnameswayne/mininearestneighbors/src/graph"
@@ -45,6 +46,33 @@ func TestHeapify(t *testing.T) {
 
 	assert.Equal(t, 1.0, heap.heap[0].Weight)
 
+}
+
+func TestSort(t *testing.T) {
+	original := []Element{}
+	elems := []Element{
+		{Weight: 1, Vertex: g.Vertex{Id: g.ID("1")}},
+		{Weight: 5, Vertex: g.Vertex{Id: g.ID("2")}},
+		{Weight: 3, Vertex: g.Vertex{Id: g.ID("3")}},
+		{Weight: 6, Vertex: g.Vertex{Id: g.ID("4")}},
+		{Weight: 7, Vertex: g.Vertex{Id: g.ID("5")}},
+		{Weight: -1, Vertex: g.Vertex{Id: g.ID("6")}},
+	}
+	copy(original, elems)
+
+	var heap = New(Min)
+	heap.Heapify(elems)
+
+	res := heap.Sort(len(elems))
+
+	sort.Slice(elems, func(i, j int) bool {
+		return elems[i].Weight < elems[j].Weight
+	})
+
+	expected := elems
+
+	assert.Equal(t, expected, res)             //returns sorted result
+	assert.Equal(t, original, heap.Elements()) //heap is kept intact
 }
 
 func TestMaxHeap(t *testing.T) {

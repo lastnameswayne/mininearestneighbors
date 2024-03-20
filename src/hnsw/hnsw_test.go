@@ -17,8 +17,8 @@ func TestSearch(t *testing.T) {
 	vertices := hnsw.Search(q, efSize, 3)
 
 	assert.Equal(t, 3, len(vertices))
-	assert.Equal(t, "4", vertices[0].Id)
-	assert.Equal(t, "2", vertices[1].Id)
+	assert.Equal(t, g.ID("4"), vertices[0].Id)
+	assert.Equal(t, g.ID("2"), vertices[1].Id)
 }
 
 func TestConstructHNSW(t *testing.T) {

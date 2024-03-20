@@ -112,6 +112,20 @@ func (h *Heap) Delete() Element {
 	return min
 }
 
+func (h *Heap) Sort(k int) []Element {
+	res := []Element{}
+	for i := 0; i < k; i++ {
+		res = append(res, h.Delete())
+	}
+
+	hCopy := []Element{}
+	copy(hCopy, h.heap)
+
+	h.heap = hCopy
+
+	return res
+}
+
 func (h *Heap) Elements() []Element {
 	res := make([]Element, 0)
 	res = append(res, h.heap...)

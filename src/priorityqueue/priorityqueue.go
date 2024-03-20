@@ -58,3 +58,7 @@ func (p *PriorityQueue) Size() int {
 func (p *PriorityQueue) Elements() []heap.Element {
 	return p.queue.Elements()
 }
+
+func (p *PriorityQueue) Sort(k int) []heap.Element {
+	return p.queue.Sort(k)
+}
