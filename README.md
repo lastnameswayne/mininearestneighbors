@@ -1,5 +1,11 @@
 # mininearestneighbors
 
+# TODO
+
+## Try to add a metadata generic type 
+## Benchmarking
+## Advanced neighbor selector described in paper
+## Look into parallelization, try to learn some leader / follower/ replication stuff (for fun not actually useful for this)
 
 ### Searching for my favorite long sleeves measurements chest 63, length 73, shoulder 55 sleeve length 67
 - item 0: 14067131S

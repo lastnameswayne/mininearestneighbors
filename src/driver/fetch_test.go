@@ -1,4 +1,4 @@
-package fetch
+package driver
 
 import (
 	"slices"

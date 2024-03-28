@@ -1,9 +1,10 @@
-package fetch
+package driver
 
 import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 
 	h "github.com/lastnameswayne/mininearestneighbors/src/hnsw"
@@ -18,9 +19,12 @@ type MongoConfig struct {
 	DbName string `json:"dbName"`
 }
 
+var mongoIP = os.Getenv("MONGO_IP")
+var mongoDB = os.Getenv("MONGO_DB")
+
 var mongocfg = MongoConfig{
-	Ip:     "mongodb+srv://swayne:swayne@cluster0.85aqi48.mongodb.net/?retryWrites=true&w=majority",
-	DbName: "mesure",
+	Ip:     mongoIP,
+	DbName: mongoDB,
 }
 
 type Measurement struct {
