@@ -19,14 +19,6 @@ type MongoConfig struct {
 	DbName string `json:"dbName"`
 }
 
-var mongoIP = os.Getenv("MONGO_IP")
-var mongoDB = os.Getenv("MONGO_DB")
-
-var mongocfg = MongoConfig{
-	Ip:     mongoIP,
-	DbName: mongoDB,
-}
-
 type Measurement struct {
 	Name  string         `json:"name"`
 	Sizes []SizeKeyValue `json:"sizes"`
@@ -56,12 +48,20 @@ type ProductMeasurements struct {
 }
 
 func Read() {
+	var mongoIP = os.Getenv("MONGO_IP")
+	var mongoDB = os.Getenv("MONGO_DB")
+	var mongoCfg = MongoConfig{
+		Ip:     mongoIP,
+		DbName: mongoDB,
+	}
+
+	fmt.Println("mongoIP", mongoIP)
 	layerCount := 15
 	M := 5
 	mMax := 2 * M //recommended
 	efSize := 50
 	hnsw := h.ConstructHNSW(layerCount)
-	cursor := fetch()
+	cursor := fetch(mongoCfg)
 
 	for cursor.Next(context.TODO()) {
 		var result ProductMeasurements
@@ -154,10 +154,10 @@ func newClient(mongoConfig MongoConfig) (*mongo.Client, error) {
 	return client, nil
 }
 
-func fetch() *mongo.Cursor {
+func fetch(mongoCfg MongoConfig) *mongo.Cursor {
 	// Set client options
 	ctx := context.TODO()
-	client, err := newClient(mongocfg)
+	client, err := newClient(mongoCfg)
 	if err != nil {
 		panic(err)
 	}
