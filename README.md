@@ -2,7 +2,7 @@
 I use this to search for clothes that fit me.
 # TODO
 
-## Try to add a metadata generic type 
+## Try to add a metadata generic type or string map or something
 ## Benchmarking
 ## Advanced neighbor selector described in paper
 ## Look into parallelization, try to learn some leader / follower/ replication stuff (for fun not actually useful for this)
