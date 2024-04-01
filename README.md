@@ -1,5 +1,5 @@
 # mininearestneighbors
-
+I use this to search for clothes that fit me.
 # TODO
 
 ## Try to add a metadata generic type 
