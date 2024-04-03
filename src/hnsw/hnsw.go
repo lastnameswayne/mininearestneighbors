@@ -202,6 +202,58 @@ func selectNeighbors(vertex g.Vertex, W []g.ID, M int, layer g.Graph) []g.Vertex
 	return vertices[:min(len(vertices), M)]
 }
 
+// Input: base element q, candidate elements C, number of neighbors to
+// return M, layer number lc, flag indicating whether or not to extend
+// candidate list extendCandidates, flag indicating
+func selectNeighborsHeuristic(vertex g.Vertex, W []g.ID, M int, layer g.Graph, extendCandidates, keepPrunedConnections bool) []g.Vertex { //simple
+
+	R := s.Set{}
+	W_queue := q.New(vertex, heap.Min)
+	W_seen := s.Set{}
+	for _, elem := range W {
+		W_queue.Push(layer[elem])
+	}
+
+	if extendCandidates {
+		for _, elem := range W {
+			for _, neighbor := range layer.Neighborhood(elem) {
+				if !W_seen.Has(string(neighbor)) {
+					W_seen.Add(string(neighbor))
+					W_queue.Push(layer[neighbor])
+				}
+			}
+		}
+	}
+
+	discarded := q.New(vertex, heap.Min)
+	for W_queue.Size() > 0 && len(R) < M {
+		closest := W_queue.Pop()
+
+		closestToQInR := math.Inf(1)
+		for elem, _ := range R {
+			distance := v.Distance(layer[g.ID(elem)].Vector, vertex.Vector)
+			closestToQInR = min(closestToQInR, distance)
+		}
+
+		if closest.Weight < closestToQInR {
+			R.Add(string(closest.Vertex.Id))
+			break
+		}
+
+		discarded.Push(closest.Vertex)
+	}
+
+	if keepPrunedConnections {
+		for discarded.Size() > 0 && len(R) < M {
+			closest := discarded.Pop()
+			R.Add(string(closest.Vertex.Id))
+
+		}
+	}
+
+	return nil
+}
+
 func calculateLevel(levelMultiplier float64) int {
 	uniform := rand.Float64()
 	prob := -math.Log(uniform * levelMultiplier)
