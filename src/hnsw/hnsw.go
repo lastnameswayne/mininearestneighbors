@@ -140,8 +140,8 @@ func (hnsw hnsw) InsertVector(queryVector v.Vector, efSize int, M int, mMax int)
 
 // does a greedy search over a layer, and each layer is a graph by itself
 func searchLayer(query g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize int) *q.PriorityQueue {
-	visited := s.Set{} //vertices we have visited
-	visited.Add(string(entrancePoint.Id))
+	visited := s.New[g.ID]() //vertices we have visited
+	visited.Add(entrancePoint.Id)
 	candidates, W := initSearchLayerHeaps(entrancePoint, query)
 
 	for candidates.Size() > 0 {
@@ -154,11 +154,11 @@ func searchLayer(query g.Vertex, layer g.Graph, entrancePoint g.Vertex, efSize i
 
 		neighborhood := layer.Neighborhood(nearest.Vertex.Id)
 		for _, neighbor := range neighborhood {
-			if visited.Has(string(neighbor)) {
+			if visited.Has(neighbor) {
 				continue
 			}
 
-			visited.Add(string(neighbor))
+			visited.Add(neighbor)
 
 			neighborVertex := layer[neighbor]
 			neighborIsCloserThanFurthest := v.Distance(query.Vector, neighborVertex.Vector) < furthest.GetWeight()
@@ -206,10 +206,9 @@ func selectNeighbors(vertex g.Vertex, W []g.ID, M int, layer g.Graph) []g.Vertex
 // return M, layer number lc, flag indicating whether or not to extend
 // candidate list extendCandidates, flag indicating
 func selectNeighborsHeuristic(vertex g.Vertex, W []g.ID, M int, layer g.Graph, extendCandidates, keepPrunedConnections bool) []g.Vertex { //simple
-
-	R := s.Set{}
+	R := s.New[g.ID]()
 	W_queue := q.New(vertex, heap.Min)
-	W_seen := s.Set{}
+	W_seen := s.New[g.ID]()
 	for _, elem := range W {
 		W_queue.Push(layer[elem])
 	}
@@ -217,8 +216,8 @@ func selectNeighborsHeuristic(vertex g.Vertex, W []g.ID, M int, layer g.Graph, e
 	if extendCandidates {
 		for _, elem := range W {
 			for _, neighbor := range layer.Neighborhood(elem) {
-				if !W_seen.Has(string(neighbor)) {
-					W_seen.Add(string(neighbor))
+				if !W_seen.Has(neighbor) {
+					W_seen.Add(neighbor)
 					W_queue.Push(layer[neighbor])
 				}
 			}
@@ -236,7 +235,7 @@ func selectNeighborsHeuristic(vertex g.Vertex, W []g.ID, M int, layer g.Graph, e
 		}
 
 		if closest.Weight < closestToQInR {
-			R.Add(string(closest.Vertex.Id))
+			R.Add(closest.Vertex.Id)
 			break
 		}
 
@@ -246,12 +245,21 @@ func selectNeighborsHeuristic(vertex g.Vertex, W []g.ID, M int, layer g.Graph, e
 	if keepPrunedConnections {
 		for discarded.Size() > 0 && len(R) < M {
 			closest := discarded.Pop()
-			R.Add(string(closest.Vertex.Id))
-
+			R.Add(closest.Vertex.Id)
 		}
 	}
 
-	return nil
+	result := []g.Vertex{}
+	for elem, _ := range R {
+		vertex, ok := layer[elem]
+		if !ok {
+			continue
+		}
+
+		result = append(result, vertex)
+	}
+
+	return result
 }
 
 func calculateLevel(levelMultiplier float64) int {

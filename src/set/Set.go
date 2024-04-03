@@ -1,17 +1,24 @@
 package Set
 
-type Set map[string]bool
+type T any
 
-func (s Set) GetRandom() string {
+type Set[T comparable] map[T]bool
+
+func New[T comparable]() Set[T] {
+	return make(Set[T])
+}
+
+func (s Set[T]) GetRandom() T {
 	for id, _ := range s {
 		return id
 	}
 
-	return "-1"
+	var emptyReturn T
+	return emptyReturn
 }
 
-func (s Set) UnsortedList() []string {
-	res := []string{}
+func (s Set[T]) UnsortedList() []T {
+	res := []T{}
 	for id, _ := range s {
 		res = append(res, id)
 	}
@@ -19,16 +26,16 @@ func (s Set) UnsortedList() []string {
 	return res
 }
 
-func (s Set) Add(element string) bool {
+func (s Set[T]) Add(element T) bool {
 	s[element] = true
 	return true
 }
-func (s Set) Delete(element string) bool {
+func (s Set[T]) Delete(element T) bool {
 	delete(s, element)
 	return true
 }
 
-func (s Set) Has(element string) bool {
+func (s Set[T]) Has(element T) bool {
 	_, ok := s[element]
 	return ok
 }
